@@ -1,6 +1,6 @@
 {
-    "name": "AJUPAM Canchas - Notificaciones de Disponibilidad",
-    "short_name": "AJUPAM Canchas",
+    "name": "AJUPAM - Sistema de notificación de Canchas",
+    "short_name": "AJUPAM - Canchas",
     "description": "Sistema de notificaciones push para disponibilidad de canchas de pádel - AJUPAM Mendoza",
     "start_url": "/",
     "scope": "/",
@@ -60,31 +60,36 @@
             "purpose": "any maskable"
         }
     ],
+    "screenshots": [
+        {
+            "src": "/screenshots/screenshot-1.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/screenshots/screenshot-2.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
     "categories": ["sports", "utilities", "productivity"],
     "shortcuts": [
         {
-            "name": "Escanear QR",
-            "short_name": "Escanear",
-            "description": "Escanear código QR de cancha",
-            "url": "/?action=scan",
+            "name": "Ver Canchas",
+            "short_name": "Canchas",
+            "description": "Ver canchas disponibles",
+            "url": "/",
             "icons": [
                 {
-                    "src": "/icons/icon-96.png",
-                    "sizes": "96x96"
-                }
-            ]
-        },
-        {
-            "name": "Administrador",
-            "short_name": "Admin",
-            "description": "Panel de administración",
-            "url": "/?action=admin",
-            "icons": [
-                {
-                    "src": "/icons/icon-96.png",
-                    "sizes": "96x96"
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
                 }
             ]
         }
-    ]
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false
 }

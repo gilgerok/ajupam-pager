@@ -1,94 +1,62 @@
 /* ============================================
-   AJUPAM CANCHAS - APP PRINCIPAL
-   Sistema de Notificaciones de Disponibilidad
+   AJUPAM PAGER - JAVASCRIPT PRINCIPAL
+   Sistema de Notificaciones de Canchas
    ============================================ */
 
-// Estado global de la aplicación
+// ============================================
+// ESTADO DE LA APLICACIÓN
+// ============================================
+
 const AppState = {
     currentUser: null,
     isAdmin: false,
+    fcmToken: null,
     courts: [],
-    subscriptions: [],
-    fcmToken: null
+    subscriptions: []
 };
 
-// Elementos del DOM
-const DOM = {
-    userView: null,
-    adminView: null,
-    courtsList: null,
-    adminCourtsList: null,
-    mySubscriptions: null,
-    loginModal: null,
-    addCourtModal: null,
-    notificationModal: null,
-    toastContainer: null
-};
+// ============================================
+// REFERENCIAS DOM
+// ============================================
 
-// Inicializar DOM
+let DOM = {};
+
 function initDOM() {
-    DOM.userView = document.getElementById('user-view');
-    DOM.adminView = document.getElementById('admin-view');
-    DOM.courtsList = document.getElementById('courts-list');
-    DOM.adminCourtsList = document.getElementById('admin-courts-list');
-    DOM.mySubscriptions = document.getElementById('my-subscriptions');
-    DOM.loginModal = document.getElementById('login-modal');
-    DOM.addCourtModal = document.getElementById('add-court-modal');
-    DOM.notificationModal = document.getElementById('notification-modal');
-    DOM.toastContainer = document.getElementById('toast-container');
-}
-
-// ============================================
-// UTILIDADES
-// ============================================
-
-function showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    const icon = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        warning: 'fa-exclamation-triangle',
-        info: 'fa-info-circle'
-    }[type] || 'fa-info-circle';
-    
-    toast.innerHTML = `
-        <i class="fas ${icon}"></i>
-        <span>${message}</span>
-    `;
-    
-    DOM.toastContainer.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('toast-show');
-    }, 10);
-    
-    setTimeout(() => {
-        toast.classList.remove('toast-show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-function showModal(modalElement) {
-    modalElement.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function hideModal(modalElement) {
-    modalElement.classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-function setLoading(element, isLoading) {
-    if (isLoading) {
-        element.innerHTML = `
-            <div class="loading">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Cargando...</p>
-            </div>
-        `;
-    }
+    DOM = {
+        // Views
+        authView: document.getElementById('auth-view'),
+        userView: document.getElementById('user-view'),
+        adminView: document.getElementById('admin-view'),
+        
+        // Auth
+        loginForm: document.getElementById('login-form'),
+        emailInput: document.getElementById('email'),
+        passwordInput: document.getElementById('password'),
+        goToUserBtn: document.getElementById('go-to-user'),
+        logoutBtn: document.getElementById('logout-btn'),
+        
+        // User View
+        courtsList: document.getElementById('courts-list'),
+        mySubscriptions: document.getElementById('my-subscriptions'),
+        
+        // Admin View
+        adminCourtsList: document.getElementById('admin-courts-list'),
+        addCourtBtn: document.getElementById('add-court-btn'),
+        
+        // Modals
+        addCourtModal: document.getElementById('add-court-modal'),
+        addCourtForm: document.getElementById('add-court-form'),
+        notificationModal: document.getElementById('notification-modal'),
+        notificationForm: document.getElementById('notification-form'),
+        
+        // Stats
+        totalCourts: document.getElementById('total-courts'),
+        totalSubscribers: document.getElementById('total-subscribers'),
+        activeSubscriptions: document.getElementById('active-subscriptions'),
+        
+        // Toast
+        toastContainer: document.getElementById('toast-container')
+    };
 }
 
 // ============================================
@@ -96,50 +64,46 @@ function setLoading(element, isLoading) {
 // ============================================
 
 function setupAuthListeners() {
-    // Botón admin
-    document.getElementById('admin-btn').addEventListener('click', () => {
-        if (AppState.isAdmin) {
-            showAdminView();
-        } else {
-            showModal(DOM.loginModal);
-        }
-    });
-    
     // Login form
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+    DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('admin-email').value;
-        const password = document.getElementById('admin-password').value;
+        const email = DOM.emailInput.value;
+        const password = DOM.passwordInput.value;
         
         try {
             await auth.signInWithEmailAndPassword(email, password);
-            hideModal(DOM.loginModal);
-            showToast('Sesión iniciada correctamente', 'success');
-            AppState.isAdmin = true;
+            showToast('¡Bienvenido, Admin!', 'success');
             showAdminView();
         } catch (error) {
             console.error('Error en login:', error);
-            showToast('Error al iniciar sesión. Verifica tus credenciales', 'error');
+            showToast('Credenciales incorrectas', 'error');
         }
+    });
+    
+    // Go to user view
+    DOM.goToUserBtn.addEventListener('click', () => {
+        showUserView();
     });
     
     // Logout
-    document.getElementById('logout-btn').addEventListener('click', async () => {
+    DOM.logoutBtn.addEventListener('click', async () => {
         try {
             await auth.signOut();
-            AppState.isAdmin = false;
+            showToast('Sesión cerrada', 'success');
             showUserView();
-            showToast('Sesión cerrada', 'info');
         } catch (error) {
             console.error('Error en logout:', error);
+            showToast('Error al cerrar sesión', 'error');
         }
     });
     
-    // Monitorear estado de autenticación
+    // Auth state observer
     auth.onAuthStateChanged((user) => {
         AppState.currentUser = user;
         if (user) {
-            console.log('Usuario autenticado:', user.email);
+            AppState.isAdmin = true;
+        } else {
+            AppState.isAdmin = false;
         }
     });
 }
@@ -148,30 +112,80 @@ function setupAuthListeners() {
 // VISTAS
 // ============================================
 
+function showAuthView() {
+    DOM.authView.classList.remove('hidden');
+    DOM.userView.classList.add('hidden');
+    DOM.adminView.classList.add('hidden');
+}
+
 function showUserView() {
+    DOM.authView.classList.add('hidden');
     DOM.userView.classList.remove('hidden');
     DOM.adminView.classList.add('hidden');
+    
     loadCourts();
-    loadMySubscriptions();
+    updateSubscriptionsList();
 }
 
 function showAdminView() {
+    DOM.authView.classList.add('hidden');
     DOM.userView.classList.add('hidden');
     DOM.adminView.classList.remove('hidden');
+    
     loadAdminCourts();
-    generateQRCode();
     loadStatistics();
 }
 
 // ============================================
-// CANCHAS - Vista Usuario
+// TOAST NOTIFICATIONS
+// ============================================
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : 
+                 type === 'error' ? 'fa-exclamation-circle' : 
+                 'fa-info-circle';
+    
+    toast.innerHTML = `
+        <i class="fas ${icon} toast-icon"></i>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    DOM.toastContainer.appendChild(toast);
+    
+    // Close button
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.remove();
+    });
+    
+    // Auto remove
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// ============================================
+// CANCHAS - VISTA USUARIO
 // ============================================
 
 async function loadCourts() {
-    setLoading(DOM.courtsList, true);
-    
     try {
-        const snapshot = await db.collection('courts').orderBy('name').get();
+        DOM.courtsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando canchas...</p></div>';
+        
+        const snapshot = await db.collection('courts')
+            .orderBy('number')
+            .get();
+        
+        if (snapshot.empty) {
+            DOM.courtsList.innerHTML = '<p class="empty-state">No hay canchas disponibles aún</p>';
+            return;
+        }
+        
         AppState.courts = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -180,85 +194,74 @@ async function loadCourts() {
         renderCourts();
     } catch (error) {
         console.error('Error al cargar canchas:', error);
-        DOM.courtsList.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Error al cargar las canchas</p>
-            </div>
-        `;
+        DOM.courtsList.innerHTML = '<p class="empty-state">Error al cargar canchas</p>';
     }
 }
 
 function renderCourts() {
-    if (AppState.courts.length === 0) {
-        DOM.courtsList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-volleyball-ball"></i>
-                <p>No hay canchas disponibles aún</p>
-            </div>
-        `;
-        return;
-    }
+    DOM.courtsList.innerHTML = '';
     
-    DOM.courtsList.innerHTML = AppState.courts.map(court => {
+    AppState.courts.forEach(court => {
         const isSubscribed = AppState.subscriptions.includes(court.id);
-        const isEnabled = court.enabled !== false;
+        const isDisabled = !court.enabled;
         
-        return `
-            <div class="court-card ${isSubscribed ? 'subscribed' : ''} ${!isEnabled ? 'disabled' : ''}" 
-                 data-court-id="${court.id}">
-                <div class="court-info">
-                    <h3 class="court-name">
-                        <i class="fas fa-volleyball-ball"></i>
-                        ${court.name}
-                    </h3>
-                    ${court.location ? `<p class="court-location"><i class="fas fa-map-marker-alt"></i> ${court.location}</p>` : ''}
-                    <p class="court-status">
-                        ${isSubscribed ? '<i class="fas fa-check-circle"></i> Notificaciones activadas' : 
-                          !isEnabled ? '<i class="fas fa-ban"></i> Cancha no disponible' :
-                          'Toca para activar notificaciones'}
-                    </p>
-                </div>
-                <div class="court-toggle">
-                    <label class="toggle" ${!isEnabled ? 'style="opacity:0.5"' : ''}>
-                        <input type="checkbox" 
-                               ${isSubscribed ? 'checked' : ''} 
-                               ${!isEnabled ? 'disabled' : ''}
-                               onchange="toggleSubscription('${court.id}', this.checked)">
+        const courtCard = document.createElement('div');
+        courtCard.className = `court-card ${isDisabled ? 'disabled' : ''}`;
+        
+        courtCard.innerHTML = `
+            <div class="court-header">
+                <h3>Cancha ${court.number}</h3>
+                <span class="court-status ${isDisabled ? 'status-disabled' : 'status-available'}">
+                    <i class="fas fa-circle"></i>
+                    ${isDisabled ? 'Deshabilitada' : 'Disponible'}
+                </span>
+            </div>
+            <div class="court-actions">
+                <div class="subscription-toggle">
+                    <span>${isSubscribed ? 'Suscripto' : 'Suscribirse'}</span>
+                    <label class="toggle">
+                        <input 
+                            type="checkbox" 
+                            ${isSubscribed ? 'checked' : ''} 
+                            ${isDisabled ? 'disabled' : ''}
+                            onchange="toggleSubscription('${court.id}', ${court.number}, this.checked)">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
             </div>
         `;
-    }).join('');
+        
+        DOM.courtsList.appendChild(courtCard);
+    });
 }
 
-async function toggleSubscription(courtId, subscribe) {
-    // Solicitar permisos si no los tiene
-    if (subscribe && !AppState.fcmToken) {
-        const token = await window.solicitarPermisosNotificacion();
-        if (!token) {
-            showToast('Debes permitir las notificaciones', 'warning');
-            loadCourts(); // Recargar para resetear el toggle
-            return;
-        }
-        AppState.fcmToken = token;
-    }
-    
+async function toggleSubscription(courtId, courtNumber, subscribe) {
     try {
-        const court = AppState.courts.find(c => c.id === courtId);
+        // Solicitar permisos si no están otorgados
+        if (Notification.permission !== 'granted') {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                showToast('Necesitás habilitar las notificaciones', 'warning');
+                return;
+            }
+        }
+        
+        // Obtener token FCM
+        if (!AppState.fcmToken) {
+            AppState.fcmToken = await window.obtenerTokenFCM();
+        }
         
         if (subscribe) {
             // Suscribirse
             await db.collection('subscriptions').add({
                 courtId: courtId,
-                courtName: court.name,
+                courtNumber: courtNumber,
                 token: AppState.fcmToken,
-                subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
             AppState.subscriptions.push(courtId);
-            showToast(`Te suscribiste a ${court.name}`, 'success');
+            showToast(`Suscripto a Cancha ${courtNumber}`, 'success');
         } else {
             // Desuscribirse
             const snapshot = await db.collection('subscriptions')
@@ -270,44 +273,51 @@ async function toggleSubscription(courtId, subscribe) {
             await Promise.all(deletePromises);
             
             AppState.subscriptions = AppState.subscriptions.filter(id => id !== courtId);
-            showToast(`Te desuscribiste de ${court.name}`, 'info');
+            showToast(`Desuscripto de Cancha ${courtNumber}`, 'success');
         }
         
-        renderCourts();
-        loadMySubscriptions();
+        updateSubscriptionsList();
         
     } catch (error) {
-        console.error('Error al cambiar suscripción:', error);
-        showToast('Error al actualizar la suscripción', 'error');
-        loadCourts(); // Recargar para resetear el estado
+        console.error('Error al gestionar suscripción:', error);
+        showToast('Error al actualizar suscripción', 'error');
     }
 }
 
-async function loadMySubscriptions() {
-    if (!AppState.fcmToken) {
-        DOM.mySubscriptions.innerHTML = '<p class="empty-state">Activá una cancha para ver tus suscripciones</p>';
-        return;
-    }
-    
+async function updateSubscriptionsList() {
     try {
+        if (!AppState.fcmToken) {
+            AppState.fcmToken = await window.obtenerTokenFCM().catch(() => null);
+        }
+        
+        if (!AppState.fcmToken) {
+            DOM.mySubscriptions.innerHTML = '<p class="empty-state">Habilitá las notificaciones para suscribirte</p>';
+            return;
+        }
+        
         const snapshot = await db.collection('subscriptions')
             .where('token', '==', AppState.fcmToken)
             .get();
         
         if (snapshot.empty) {
             DOM.mySubscriptions.innerHTML = '<p class="empty-state">No tenés suscripciones activas aún</p>';
+            AppState.subscriptions = [];
             return;
         }
         
-        const subscriptions = snapshot.docs.map(doc => doc.data());
-        AppState.subscriptions = subscriptions.map(s => s.courtId);
+        AppState.subscriptions = snapshot.docs.map(doc => doc.data().courtId);
         
-        DOM.mySubscriptions.innerHTML = subscriptions.map(sub => `
-            <div class="subscription-item">
+        DOM.mySubscriptions.innerHTML = '';
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const item = document.createElement('div');
+            item.className = 'subscription-item';
+            item.innerHTML = `
                 <i class="fas fa-check-circle"></i>
-                <span>${sub.courtName}</span>
-            </div>
-        `).join('');
+                <span>Cancha ${data.courtNumber}</span>
+            `;
+            DOM.mySubscriptions.appendChild(item);
+        });
         
     } catch (error) {
         console.error('Error al cargar suscripciones:', error);
@@ -315,124 +325,107 @@ async function loadMySubscriptions() {
 }
 
 // ============================================
-// CANCHAS - Vista Admin
+// ADMIN - GESTIÓN DE CANCHAS
 // ============================================
 
 function setupAdminListeners() {
-    // Agregar cancha
-    document.getElementById('add-court-btn').addEventListener('click', () => {
+    // Add court button
+    DOM.addCourtBtn.addEventListener('click', () => {
         showModal(DOM.addCourtModal);
     });
     
-    // Form agregar cancha
-    document.getElementById('add-court-form').addEventListener('submit', async (e) => {
+    // Add court form
+    DOM.addCourtForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const name = document.getElementById('court-name').value;
-        const location = document.getElementById('court-location').value;
+        const courtNumber = parseInt(document.getElementById('court-number').value);
         
         try {
             await db.collection('courts').add({
-                name: name,
-                location: location || '',
+                number: courtNumber,
                 enabled: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
+            showToast(`Cancha ${courtNumber} creada exitosamente`, 'success');
             hideModal(DOM.addCourtModal);
-            document.getElementById('add-court-form').reset();
-            showToast('Cancha agregada correctamente', 'success');
+            DOM.addCourtForm.reset();
             loadAdminCourts();
-            
+            loadStatistics();
         } catch (error) {
-            console.error('Error al agregar cancha:', error);
-            showToast('Error al agregar la cancha', 'error');
+            console.error('Error al crear cancha:', error);
+            showToast('Error al crear la cancha', 'error');
         }
     });
-    
-    // QR Actions
-    document.getElementById('download-qr').addEventListener('click', downloadQR);
-    document.getElementById('print-qr').addEventListener('click', printQR);
-    document.getElementById('copy-url').addEventListener('click', copyURL);
 }
 
 async function loadAdminCourts() {
-    setLoading(DOM.adminCourtsList, true);
-    
     try {
-        const snapshot = await db.collection('courts').orderBy('name').get();
+        DOM.adminCourtsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando canchas...</p></div>';
+        
+        const snapshot = await db.collection('courts')
+            .orderBy('number')
+            .get();
         
         if (snapshot.empty) {
-            DOM.adminCourtsList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-volleyball-ball"></i>
-                    <p>No hay canchas creadas aún</p>
-                    <button class="btn-primary" onclick="document.getElementById('add-court-btn').click()">
-                        <i class="fas fa-plus"></i>
-                        Agregar Primera Cancha
-                    </button>
-                </div>
-            `;
+            DOM.adminCourtsList.innerHTML = '<p class="empty-state">No hay canchas creadas aún</p>';
             return;
         }
         
-        const courts = await Promise.all(snapshot.docs.map(async doc => {
-            const courtData = doc.data();
+        DOM.adminCourtsList.innerHTML = '';
+        
+        for (const doc of snapshot.docs) {
+            const court = doc.data();
+            const courtId = doc.id;
+            
+            // Contar suscriptores
             const subsSnapshot = await db.collection('subscriptions')
-                .where('courtId', '==', doc.id)
+                .where('courtId', '==', courtId)
                 .get();
             
-            return {
-                id: doc.id,
-                ...courtData,
-                subscribersCount: subsSnapshot.size
-            };
-        }));
-        
-        renderAdminCourts(courts);
+            const card = document.createElement('div');
+            card.className = `admin-court-card ${!court.enabled ? 'disabled' : ''}`;
+            
+            card.innerHTML = `
+                <div class="admin-court-header">
+                    <h4>Cancha ${court.number}</h4>
+                    <span class="court-badge ${court.enabled ? 'badge-success' : 'badge-disabled'}">
+                        ${court.enabled ? 'ACTIVA' : 'DESHABILITADA'}
+                    </span>
+                </div>
+                <div class="admin-court-stats">
+                    <i class="fas fa-users"></i>
+                    <span>${subsSnapshot.size} ${subsSnapshot.size === 1 ? 'suscriptor' : 'suscriptores'}</span>
+                </div>
+                <div class="admin-court-actions">
+                    <button 
+                        class="btn-primary" 
+                        onclick="openNotificationModal('${courtId}', ${court.number})"
+                        ${!court.enabled || subsSnapshot.size === 0 ? 'disabled' : ''}>
+                        <i class="fas fa-bell"></i>
+                        Notificar Disponibilidad
+                    </button>
+                    <button 
+                        class="btn-secondary" 
+                        onclick="toggleCourtEnabled('${courtId}', ${!court.enabled})">
+                        <i class="fas fa-${court.enabled ? 'ban' : 'check'}"></i>
+                        ${court.enabled ? 'Deshabilitar' : 'Habilitar'}
+                    </button>
+                    <button 
+                        class="btn-danger" 
+                        onclick="deleteCourt('${courtId}', ${court.number})">
+                        <i class="fas fa-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            `;
+            
+            DOM.adminCourtsList.appendChild(card);
+        }
         
     } catch (error) {
         console.error('Error al cargar canchas admin:', error);
-        DOM.adminCourtsList.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Error al cargar las canchas</p>
-            </div>
-        `;
+        DOM.adminCourtsList.innerHTML = '<p class="empty-state">Error al cargar canchas</p>';
     }
-}
-
-function renderAdminCourts(courts) {
-    DOM.adminCourtsList.innerHTML = courts.map(court => `
-        <div class="admin-court-card ${court.enabled ? 'enabled' : 'disabled'}">
-            <div class="admin-court-header">
-                <h4>${court.name}</h4>
-                <span class="court-badge ${court.enabled ? 'badge-success' : 'badge-disabled'}">
-                    ${court.enabled ? 'ACTIVA' : 'DESHABILITADA'}
-                </span>
-            </div>
-            
-            ${court.location ? `<p class="court-location"><i class="fas fa-map-marker-alt"></i> ${court.location}</p>` : ''}
-            
-            <div class="admin-court-stats">
-                <i class="fas fa-users"></i>
-                <span>${court.subscribersCount} ${court.subscribersCount === 1 ? 'suscriptor' : 'suscriptores'}</span>
-            </div>
-            
-            <div class="admin-court-actions">
-                <button class="btn-primary" 
-                        onclick="openNotificationModal('${court.id}', '${court.name}', ${court.subscribersCount})"
-                        ${!court.enabled || court.subscribersCount === 0 ? 'disabled' : ''}>
-                    <i class="fas fa-bell"></i>
-                    Notificar Disponible
-                </button>
-                <button class="btn-secondary" onclick="toggleCourtEnabled('${court.id}', ${!court.enabled})">
-                    <i class="fas fa-${court.enabled ? 'ban' : 'check'}"></i>
-                    ${court.enabled ? 'Deshabilitar' : 'Habilitar'}
-                </button>
-            </div>
-        </div>
-    `).join('');
 }
 
 async function toggleCourtEnabled(courtId, enabled) {
@@ -441,12 +434,37 @@ async function toggleCourtEnabled(courtId, enabled) {
             enabled: enabled
         });
         
-        showToast(`Cancha ${enabled ? 'habilitada' : 'deshabilitada'} correctamente`, 'success');
+        showToast(`Cancha ${enabled ? 'habilitada' : 'deshabilitada'}`, 'success');
         loadAdminCourts();
-        
     } catch (error) {
-        console.error('Error al cambiar estado de cancha:', error);
+        console.error('Error al actualizar cancha:', error);
         showToast('Error al actualizar la cancha', 'error');
+    }
+}
+
+async function deleteCourt(courtId, courtNumber) {
+    if (!confirm(`¿Estás seguro de eliminar la Cancha ${courtNumber}? Esta acción no se puede deshacer.`)) {
+        return;
+    }
+    
+    try {
+        // Eliminar suscripciones asociadas
+        const subsSnapshot = await db.collection('subscriptions')
+            .where('courtId', '==', courtId)
+            .get();
+        
+        const deletePromises = subsSnapshot.docs.map(doc => doc.ref.delete());
+        await Promise.all(deletePromises);
+        
+        // Eliminar cancha
+        await db.collection('courts').doc(courtId).delete();
+        
+        showToast(`Cancha ${courtNumber} eliminada`, 'success');
+        loadAdminCourts();
+        loadStatistics();
+    } catch (error) {
+        console.error('Error al eliminar cancha:', error);
+        showToast('Error al eliminar la cancha', 'error');
     }
 }
 
@@ -454,127 +472,48 @@ async function toggleCourtEnabled(courtId, enabled) {
 // NOTIFICACIONES
 // ============================================
 
-function openNotificationModal(courtId, courtName, subscribersCount) {
-    document.getElementById('notify-court-name').textContent = courtName;
-    document.getElementById('notify-subscribers-count').textContent = subscribersCount;
-    document.getElementById('notification-form').dataset.courtId = courtId;
-    document.getElementById('notification-form').dataset.courtName = courtName;
-    
+function openNotificationModal(courtId, courtNumber) {
+    document.getElementById('notification-court-id').value = courtId;
+    document.getElementById('notification-court-number').textContent = courtNumber;
+    document.getElementById('notification-message').value = '';
     showModal(DOM.notificationModal);
 }
 
 function setupNotificationListener() {
-    document.getElementById('notification-form').addEventListener('submit', async (e) => {
+    DOM.notificationForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const form = e.target;
-        const courtId = form.dataset.courtId;
-        const courtName = form.dataset.courtName;
-        const message = document.getElementById('notification-message').value;
+        const courtId = document.getElementById('notification-court-id').value;
+        const courtNumber = document.getElementById('notification-court-number').textContent;
+        const message = document.getElementById('notification-message').value.trim();
         
         try {
-            // Obtener todos los tokens suscritos a esta cancha
-            const snapshot = await db.collection('subscriptions')
+            // Obtener suscriptores de esta cancha
+            const subsSnapshot = await db.collection('subscriptions')
                 .where('courtId', '==', courtId)
                 .get();
             
-            if (snapshot.empty) {
+            if (subsSnapshot.empty) {
                 showToast('No hay suscriptores para esta cancha', 'warning');
                 return;
             }
             
-            const tokens = snapshot.docs.map(doc => doc.data().token);
-            
-            // Enviar notificaciones (esto requiere Cloud Functions)
-            // Por ahora, guardamos la notificación en Firestore
+            // Crear registro de notificación
             await db.collection('notifications').add({
                 courtId: courtId,
-                courtName: courtName,
-                message: message,
-                tokens: tokens,
-                sentAt: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'pending'
+                courtNumber: parseInt(courtNumber),
+                message: message || null,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                subscribersCount: subsSnapshot.size
             });
             
             hideModal(DOM.notificationModal);
-            form.reset();
-            showToast(`Notificación enviada a ${tokens.length} ${tokens.length === 1 ? 'usuario' : 'usuarios'}`, 'success');
+            showToast(`Notificación enviada a ${subsSnapshot.size} ${subsSnapshot.size === 1 ? 'usuario' : 'usuarios'}`, 'success');
             
         } catch (error) {
             console.error('Error al enviar notificación:', error);
             showToast('Error al enviar la notificación', 'error');
         }
-    });
-}
-
-// ============================================
-// QR CODE
-// ============================================
-
-function generateQRCode() {
-    const canvas = document.getElementById('qr-code');
-    const url = window.location.origin + '/';
-    
-    QRCode.toCanvas(canvas, url, {
-        width: 256,
-        margin: 2,
-        color: {
-            dark: '#0066CC',
-            light: '#FFFFFF'
-        }
-    }, (error) => {
-        if (error) {
-            console.error('Error generando QR:', error);
-        }
-    });
-    
-    document.getElementById('app-url').textContent = url;
-}
-
-function downloadQR() {
-    const canvas = document.getElementById('qr-code');
-    const url = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = 'ajupam-canchas-qr.png';
-    link.href = url;
-    link.click();
-    showToast('QR descargado', 'success');
-}
-
-function printQR() {
-    const canvas = document.getElementById('qr-code');
-    const win = window.open('', '_blank');
-    win.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>AJUPAM Canchas - QR Code</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                    padding: 2rem;
-                }
-                h1 { color: #0066CC; }
-                img { margin: 2rem 0; }
-            </style>
-        </head>
-        <body>
-            <h1>AJUPAM Canchas</h1>
-            <p>Escaneá el código QR para recibir notificaciones</p>
-            <img src="${canvas.toDataURL()}" />
-            <p>${window.location.origin}/</p>
-        </body>
-        </html>
-    `);
-    win.document.close();
-    win.print();
-}
-
-function copyURL() {
-    const url = window.location.origin + '/';
-    navigator.clipboard.writeText(url).then(() => {
-        showToast('URL copiada al portapapeles', 'success');
     });
 }
 
@@ -590,9 +529,9 @@ async function loadStatistics() {
         // Contar suscriptores únicos
         const uniqueTokens = new Set(subsSnapshot.docs.map(doc => doc.data().token));
         
-        document.getElementById('total-courts').textContent = courtsSnapshot.size;
-        document.getElementById('total-subscribers').textContent = uniqueTokens.size;
-        document.getElementById('active-subscriptions').textContent = subsSnapshot.size;
+        DOM.totalCourts.textContent = courtsSnapshot.size;
+        DOM.totalSubscribers.textContent = uniqueTokens.size;
+        DOM.activeSubscriptions.textContent = subsSnapshot.size;
         
     } catch (error) {
         console.error('Error al cargar estadísticas:', error);
@@ -602,6 +541,14 @@ async function loadStatistics() {
 // ============================================
 // MODALES
 // ============================================
+
+function showModal(modal) {
+    modal.classList.remove('hidden');
+}
+
+function hideModal(modal) {
+    modal.classList.add('hidden');
+}
 
 function setupModalListeners() {
     // Cerrar modales con X
@@ -636,7 +583,7 @@ function setupModalListeners() {
 // ============================================
 
 async function init() {
-    console.log('🚀 Inicializando AJUPAM Canchas...');
+    console.log('🚀 Inicializando AJUPAM Pager...');
     
     // Inicializar DOM
     initDOM();
@@ -660,7 +607,7 @@ async function init() {
         }
     }
     
-    console.log('✅ AJUPAM Canchas inicializado');
+    console.log('✅ AJUPAM Pager inicializado');
 }
 
 // Iniciar cuando el DOM esté listo
@@ -673,4 +620,5 @@ if (document.readyState === 'loading') {
 // Exponer funciones globalmente para uso en HTML
 window.toggleSubscription = toggleSubscription;
 window.toggleCourtEnabled = toggleCourtEnabled;
+window.deleteCourt = deleteCourt;
 window.openNotificationModal = openNotificationModal;
