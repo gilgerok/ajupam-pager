@@ -34,10 +34,11 @@ function initDOM() {
         passwordInput: document.getElementById('password'),
         goToUserBtn: document.getElementById('go-to-user'),
         logoutBtn: document.getElementById('logout-btn'),
+        adminAccessLink: document.getElementById('admin-access-link'),
         
         // User View
         courtsList: document.getElementById('courts-list'),
-        mySubscriptions: document.getElementById('my-subscriptions'),
+        unsubscribeAllBtn: document.getElementById('unsubscribe-all-btn'),
         
         // Admin View
         adminCourtsList: document.getElementById('admin-courts-list'),
@@ -85,6 +86,12 @@ function setupAuthListeners() {
         showUserView();
     });
     
+    // Admin access link (oculto en el footer)
+    DOM.adminAccessLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showAuthView();
+    });
+    
     // Logout
     DOM.logoutBtn.addEventListener('click', async () => {
         try {
@@ -94,6 +101,43 @@ function setupAuthListeners() {
         } catch (error) {
             console.error('Error en logout:', error);
             showToast('Error al cerrar sesión', 'error');
+        }
+    });
+    
+    // Unsubscribe all button
+    DOM.unsubscribeAllBtn.addEventListener('click', async () => {
+        if (!confirm('¿Estás seguro de cancelar TODAS las notificaciones?')) {
+            return;
+        }
+        
+        try {
+            if (!AppState.fcmToken) {
+                showToast('No hay suscripciones activas', 'warning');
+                return;
+            }
+            
+            const snapshot = await db.collection('subscriptions')
+                .where('token', '==', AppState.fcmToken)
+                .get();
+            
+            if (snapshot.empty) {
+                showToast('No hay suscripciones activas', 'warning');
+                return;
+            }
+            
+            const deletePromises = snapshot.docs.map(doc => doc.ref.delete());
+            await Promise.all(deletePromises);
+            
+            AppState.subscriptions = [];
+            showToast(`${snapshot.size} suscripciones canceladas`, 'success');
+            
+            // Recargar canchas para actualizar toggles
+            loadCourts();
+            updateUnsubscribeAllButton();
+            
+        } catch (error) {
+            console.error('Error al cancelar suscripciones:', error);
+            showToast('Error al cancelar suscripciones', 'error');
         }
     });
     
@@ -124,7 +168,6 @@ function showUserView() {
     DOM.adminView.classList.add('hidden');
     
     loadCourts();
-    updateSubscriptionsList();
 }
 
 function showAdminView() {
@@ -177,6 +220,9 @@ async function loadCourts() {
     try {
         DOM.courtsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando canchas...</p></div>';
         
+        // Cargar suscripciones primero
+        await loadSubscriptions();
+        
         const snapshot = await db.collection('courts')
             .orderBy('number')
             .get();
@@ -192,9 +238,41 @@ async function loadCourts() {
         }));
         
         renderCourts();
+        updateUnsubscribeAllButton();
     } catch (error) {
         console.error('Error al cargar canchas:', error);
         DOM.courtsList.innerHTML = '<p class="empty-state">Error al cargar canchas</p>';
+    }
+}
+
+async function loadSubscriptions() {
+    try {
+        if (!AppState.fcmToken) {
+            AppState.fcmToken = await window.obtenerTokenFCM().catch(() => null);
+        }
+        
+        if (!AppState.fcmToken) {
+            AppState.subscriptions = [];
+            return;
+        }
+        
+        const snapshot = await db.collection('subscriptions')
+            .where('token', '==', AppState.fcmToken)
+            .get();
+        
+        AppState.subscriptions = snapshot.docs.map(doc => doc.data().courtId);
+        
+    } catch (error) {
+        console.error('Error al cargar suscripciones:', error);
+        AppState.subscriptions = [];
+    }
+}
+
+function updateUnsubscribeAllButton() {
+    if (AppState.subscriptions.length > 0) {
+        DOM.unsubscribeAllBtn.style.display = 'inline-flex';
+    } else {
+        DOM.unsubscribeAllBtn.style.display = 'none';
     }
 }
 
@@ -242,6 +320,8 @@ async function toggleSubscription(courtId, courtNumber, subscribe) {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') {
                 showToast('Necesitás habilitar las notificaciones', 'warning');
+                // Revertir toggle
+                loadCourts();
                 return;
             }
         }
@@ -276,51 +356,13 @@ async function toggleSubscription(courtId, courtNumber, subscribe) {
             showToast(`Desuscripto de Cancha ${courtNumber}`, 'success');
         }
         
-        updateSubscriptionsList();
+        updateUnsubscribeAllButton();
         
     } catch (error) {
         console.error('Error al gestionar suscripción:', error);
         showToast('Error al actualizar suscripción', 'error');
-    }
-}
-
-async function updateSubscriptionsList() {
-    try {
-        if (!AppState.fcmToken) {
-            AppState.fcmToken = await window.obtenerTokenFCM().catch(() => null);
-        }
-        
-        if (!AppState.fcmToken) {
-            DOM.mySubscriptions.innerHTML = '<p class="empty-state">Habilitá las notificaciones para suscribirte</p>';
-            return;
-        }
-        
-        const snapshot = await db.collection('subscriptions')
-            .where('token', '==', AppState.fcmToken)
-            .get();
-        
-        if (snapshot.empty) {
-            DOM.mySubscriptions.innerHTML = '<p class="empty-state">No tenés suscripciones activas aún</p>';
-            AppState.subscriptions = [];
-            return;
-        }
-        
-        AppState.subscriptions = snapshot.docs.map(doc => doc.data().courtId);
-        
-        DOM.mySubscriptions.innerHTML = '';
-        snapshot.docs.forEach(doc => {
-            const data = doc.data();
-            const item = document.createElement('div');
-            item.className = 'subscription-item';
-            item.innerHTML = `
-                <i class="fas fa-check-circle"></i>
-                <span>Cancha ${data.courtNumber}</span>
-            `;
-            DOM.mySubscriptions.appendChild(item);
-        });
-        
-    } catch (error) {
-        console.error('Error al cargar suscripciones:', error);
+        // Recargar para revertir cambios en UI
+        loadCourts();
     }
 }
 

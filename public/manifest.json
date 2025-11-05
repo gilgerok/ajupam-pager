@@ -1,6 +1,6 @@
 {
-    "name": "AJUPAM - Sistema de notificación de Canchas",
-    "short_name": "AJUPAM - Canchas",
+    "name": "AJUPAM Pager - Notificaciones de Canchas",
+    "short_name": "AJUPAM Pager",
     "description": "Sistema de notificaciones push para disponibilidad de canchas de pádel - AJUPAM Mendoza",
     "start_url": "/",
     "scope": "/",
@@ -58,20 +58,6 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
-        }
-    ],
-    "screenshots": [
-        {
-            "src": "/screenshots/screenshot-1.png",
-            "sizes": "540x720",
-            "type": "image/png",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "/screenshots/screenshot-2.png",
-            "sizes": "1280x720",
-            "type": "image/png",
-            "form_factor": "wide"
         }
     ],
     "categories": ["sports", "utilities", "productivity"],

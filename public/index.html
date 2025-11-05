@@ -32,16 +32,8 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <img src="/img/logo-ajupam.png" alt="AJUPAM" class="logo-img">
-                    <div class="logo-text">
-                        <h1>AJUPAM</h1>
-                        <span>PAGER</span>
-                    </div>
+                    <img src="/images/logo-ajupam.png" alt="AJUPAM" class="logo-img">
                 </div>
-                <button id="toggle-view" class="btn-secondary" style="display: none;">
-                    <i class="fas fa-user-shield"></i>
-                    Admin
-                </button>
             </div>
         </div>
     </header>
@@ -65,8 +57,7 @@
                         <input 
                             type="email" 
                             id="email" 
-                            class="form-control" 
-                            placeholder="admin@ajupam.ar"
+                            class="form-control"
                             required
                             autocomplete="email">
                     </div>
@@ -78,8 +69,7 @@
                         <input 
                             type="password" 
                             id="password" 
-                            class="form-control" 
-                            placeholder="••••••••"
+                            class="form-control"
                             required
                             autocomplete="current-password">
                     </div>
@@ -104,6 +94,10 @@
                 <i class="fas fa-bell welcome-icon"></i>
                 <h2>¡Recibí Notificaciones!</h2>
                 <p>Activá las canchas que te interesan y te avisaremos cuando estén disponibles</p>
+                <button id="unsubscribe-all-btn" class="btn-secondary" style="display: none; margin-top: 1.5rem;">
+                    <i class="fas fa-bell-slash"></i>
+                    Cancelar Todas las Notificaciones
+                </button>
             </div>
 
             <!-- Courts List -->
@@ -111,17 +105,6 @@
                 <div class="loading">
                     <i class="fas fa-spinner fa-spin"></i>
                     <p>Cargando canchas...</p>
-                </div>
-            </div>
-
-            <!-- My Subscriptions -->
-            <div class="subscriptions-section">
-                <h3>
-                    <i class="fas fa-check-circle"></i>
-                    Mis Suscripciones
-                </h3>
-                <div id="my-subscriptions" class="subscriptions-list">
-                    <p class="empty-state">No tenés suscripciones activas aún</p>
                 </div>
             </div>
         </section>
@@ -192,7 +175,9 @@
                     <strong>Tandem</strong>
                 </a>
             </p>
-            <p class="footer-version">v1.0.0 - AJUPAM Mendoza</p>
+            <p class="footer-version">
+                <a href="#admin" id="admin-access-link" style="color: inherit; text-decoration: none; opacity: 0.5;">v1.1.0</a> - AJUPAM Mendoza
+            </p>
         </div>
     </footer>
 
