@@ -1,0 +1,28 @@
+{
+  "name": "ajupam-canchas",
+  "version": "1.0.0",
+  "description": "Sistema de notificaciones push para disponibilidad de canchas de pádel - AJUPAM Mendoza",
+  "author": "AJUPAM - Agrupación de Jugadores de Pádel de Mendoza",
+  "license": "MIT",
+  "keywords": [
+    "padel",
+    "ajupam",
+    "notificaciones",
+    "pwa",
+    "firebase",
+    "mendoza"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gilgerok/ajupam-pager.git"
+  },
+  "scripts": {
+    "serve": "firebase serve",
+    "deploy": "firebase deploy --only hosting",
+    "deploy:full": "firebase deploy",
+    "logs": "firebase functions:log"
+  },
+  "devDependencies": {
+    "firebase-tools": "^13.0.0"
+  }
+}
