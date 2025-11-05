@@ -337,7 +337,7 @@ async function toggleSubscription(courtId, courtNumber, subscribe) {
                 courtId: courtId,
                 courtNumber: courtNumber,
                 token: AppState.fcmToken,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
             AppState.subscriptions.push(courtId);
@@ -385,7 +385,7 @@ function setupAdminListeners() {
             await db.collection('courts').add({
                 number: courtNumber,
                 enabled: true,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
             showToast(`Cancha ${courtNumber} creada exitosamente`, 'success');

@@ -22,7 +22,7 @@ service cloud.firestore {
       allow read: if true;
       
       // Cualquiera puede crear suscripciones
-      allow create: if request.resource.data.keys().hasAll(['courtId', 'courtName', 'token', 'subscribedAt']);
+      allow create: if request.resource.data.keys().hasAll(['courtId', 'courtNumber', 'token', 'subscribedAt']);
       
       // Solo se pueden eliminar las propias suscripciones
       allow delete: if true;
