@@ -385,7 +385,7 @@ function setupAdminListeners() {
             await db.collection('courts').add({
                 number: courtNumber,
                 enabled: true,
-                subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
             
             showToast(`Cancha ${courtNumber} creada exitosamente`, 'success');
@@ -540,11 +540,17 @@ function setupNotificationListener() {
                 return;
             }
             
-            // Crear registro de notificación
+            // Extraer los tokens de los suscriptores
+            const tokens = subsSnapshot.docs.map(doc => doc.data().token);
+            
+            console.log(`📤 Enviando notificación a ${tokens.length} dispositivos`);
+            
+            // Crear registro de notificación con los tokens
             await db.collection('notifications').add({
                 courtId: courtId,
                 courtNumber: parseInt(courtNumber),
                 message: message || null,
+                tokens: tokens,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 subscribersCount: subsSnapshot.size
             });
