@@ -2,7 +2,11 @@
    FIREBASE CONFIGURATION
    AJUPAM PAGER - Configuración del Cliente
    ============================================ */
-
+// Configurar debug token para App Check
+   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+       self.FIREBASE_APPCHECK_DEBUG_TOKEN = 'TU_DEBUG_TOKEN_AQUI';
+   }
+   
 // Configuración Firebase - AJUPAM Pager
 const firebaseConfig = {
     apiKey: "AIzaSyC7qu6Egw1VFV76QIfmK-AQBKLqrmIAonc",
