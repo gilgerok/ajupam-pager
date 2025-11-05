@@ -1,0 +1,866 @@
+/* ============================================
+   AJUPAM CANCHAS - ESTILOS PRINCIPALES
+   ============================================ */
+
+/* Variables CSS */
+:root {
+    --primary-blue: #0066CC;
+    --primary-yellow: #DFFF00;
+    --dark-blue: #004A99;
+    --light-blue: #3399FF;
+    --dark-gray: #1a1a1a;
+    --medium-gray: #333;
+    --light-gray: #f5f5f5;
+    --white: #fff;
+    --error: #ff4444;
+    --success: #00CC66;
+    --warning: #ffaa00;
+    
+    --font-title: 'Bebas Neue', sans-serif;
+    --font-body: 'Poppins', sans-serif;
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-full: 50px;
+    
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.2);
+    
+    --transition: all 0.3s ease;
+}
+
+/* Reset y Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-body);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    color: var(--dark-gray);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+    font-family: var(--font-title);
+    letter-spacing: 1px;
+}
+
+/* Header */
+.app-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+    color: var(--white);
+    padding: 1.5rem 0;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.app-logo {
+    height: 50px;
+    width: auto;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    flex: 1;
+    margin: 0;
+}
+
+.admin-btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.admin-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+/* Main Content */
+.app-main {
+    padding: 2rem 0;
+    min-height: calc(100vh - 100px);
+}
+
+/* Cards */
+.welcome-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2rem;
+}
+
+.welcome-icon {
+    font-size: 3rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+.welcome-card h2 {
+    font-size: 2rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.welcome-card p {
+    color: var(--medium-gray);
+    font-size: 1.1rem;
+}
+
+/* Courts List */
+.courts-list {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.court-card {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: var(--transition);
+    cursor: pointer;
+    border: 3px solid transparent;
+}
+
+.court-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.court-card.subscribed {
+    border-color: var(--primary-blue);
+    background: linear-gradient(135deg, #e6f2ff 0%, #ffffff 100%);
+}
+
+.court-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--light-gray);
+}
+
+.court-info {
+    flex: 1;
+}
+
+.court-name {
+    font-size: 1.3rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.court-location {
+    color: var(--medium-gray);
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+}
+
+.court-status {
+    font-size: 0.9rem;
+    color: var(--medium-gray);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.court-card.subscribed .court-status {
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+/* Toggle Switch */
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: var(--transition);
+    border-radius: var(--radius-full);
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition);
+    border-radius: 50%;
+}
+
+.toggle input:checked + .toggle-slider {
+    background-color: var(--primary-blue);
+}
+
+.toggle input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle input:disabled + .toggle-slider {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Subscriptions Section */
+.subscriptions-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.subscriptions-section h3 {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subscriptions-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.subscription-item {
+    padding: 0.75rem;
+    background: var(--light-gray);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-blue);
+    font-weight: 500;
+}
+
+.subscription-item i {
+    font-size: 1.2rem;
+}
+
+/* Admin View */
+.admin-view {
+    display: grid;
+    gap: 2rem;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-header h2 {
+    font-size: 2rem;
+    color: var(--primary-blue);
+    margin: 0;
+}
+
+/* QR Section */
+.qr-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.qr-section h3 {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.5rem;
+}
+
+.qr-section p {
+    color: var(--medium-gray);
+    margin-bottom: 1.5rem;
+}
+
+.qr-container {
+    display: inline-block;
+    padding: 1rem;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 1rem;
+}
+
+.qr-url {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.qr-url code {
+    font-family: 'Courier New', monospace;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.qr-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Admin Courts */
+.admin-courts-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.section-header h3 {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    margin: 0;
+}
+
+.admin-courts-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.admin-court-card {
+    background: var(--light-gray);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary-blue);
+}
+
+.admin-court-card.disabled {
+    opacity: 0.7;
+    border-left-color: #ccc;
+}
+
+.admin-court-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.admin-court-header h4 {
+    font-size: 1.3rem;
+    color: var(--dark-gray);
+    margin: 0;
+}
+
+.court-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.badge-success {
+    background: var(--success);
+    color: var(--white);
+}
+
+.badge-disabled {
+    background: #ccc;
+    color: var(--medium-gray);
+}
+
+.admin-court-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--medium-gray);
+    margin-bottom: 1rem;
+}
+
+.admin-court-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Statistics */
+.stats-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.stats-section h3 {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    margin-bottom: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+    color: var(--white);
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    opacity: 0.8;
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-title);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-icon {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--dark-blue);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--medium-gray);
+    color: var(--white);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--dark-gray);
+    transform: translateY(-2px);
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+.btn-icon:hover {
+    background: var(--dark-blue);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--medium-gray);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: var(--light-gray);
+    color: var(--dark-gray);
+}
+
+.modal-content h2 {
+    font-size: 1.8rem;
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+}
+
+.modal-description {
+    color: var(--medium-gray);
+    margin-bottom: 1.5rem;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--light-gray);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toast {
+    background: var(--white);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 250px;
+    max-width: 400px;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+}
+
+.toast.toast-show {
+    transform: translateX(0);
+}
+
+.toast i {
+    font-size: 1.5rem;
+}
+
+.toast-success {
+    border-left: 4px solid var(--success);
+}
+
+.toast-success i {
+    color: var(--success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--error);
+}
+
+.toast-error i {
+    color: var(--error);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--warning);
+}
+
+.toast-warning i {
+    color: var(--warning);
+}
+
+.toast-info {
+    border-left: 4px solid var(--primary-blue);
+}
+
+.toast-info i {
+    color: var(--primary-blue);
+}
+
+/* States */
+.loading,
+.empty-state,
+.error-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--medium-gray);
+}
+
+.loading i,
+.empty-state i,
+.error-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.loading i {
+    color: var(--primary-blue);
+}
+
+.empty-state i {
+    color: var(--medium-gray);
+}
+
+.error-state i {
+    color: var(--error);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-title {
+        font-size: 1.2rem;
+    }
+    
+    .app-logo {
+        height: 40px;
+    }
+    
+    .welcome-card {
+        padding: 1.5rem;
+    }
+    
+    .welcome-card h2 {
+        font-size: 1.5rem;
+    }
+    
+    .court-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .section-header {
+        flex-direction: column;
+    }
+    
+    .admin-court-actions {
+        flex-direction: column;
+    }
+    
+    .admin-court-actions button {
+        width: 100%;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .qr-actions {
+        flex-direction: column;
+    }
+    
+    .qr-actions button {
+        width: 100%;
+    }
+    
+    .toast-container {
+        right: 1rem;
+        left: 1rem;
+    }
+    
+    .toast {
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 0 0.75rem;
+    }
+    
+    .modal-content {
+        padding: 1.5rem;
+    }
+}

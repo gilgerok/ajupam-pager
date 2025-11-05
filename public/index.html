@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AJUPAM Canchas - Notificaciones de Disponibilidad</title>
+    <meta name="description" content="Sistema de notificaciones push para disponibilidad de canchas de pádel - AJUPAM Mendoza">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0066CC">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AJUPAM Canchas">
+    
+    <!-- Links -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="header-content">
+                <img src="/images/logo-ajupam.png" alt="AJUPAM Logo" class="app-logo">
+                <h1 class="app-title">Notificaciones de Canchas</h1>
+                <button id="admin-btn" class="admin-btn" aria-label="Panel de administración">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            
+            <!-- User View -->
+            <section id="user-view" class="user-view">
+                <div class="welcome-card">
+                    <i class="fas fa-bell welcome-icon"></i>
+                    <h2>¡Recibí Notificaciones!</h2>
+                    <p>Activá las canchas que te interesan y te avisaremos cuando estén disponibles</p>
+                </div>
+
+                <!-- Courts List -->
+                <div id="courts-list" class="courts-list">
+                    <!-- Courts will be loaded dynamically -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Cargando canchas...</p>
+                    </div>
+                </div>
+
+                <!-- My Subscriptions -->
+                <div class="subscriptions-section">
+                    <h3>
+                        <i class="fas fa-check-circle"></i>
+                        Mis Suscripciones
+                    </h3>
+                    <div id="my-subscriptions" class="subscriptions-list">
+                        <p class="empty-state">No tenés suscripciones activas aún</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin View -->
+            <section id="admin-view" class="admin-view hidden">
+                <div class="admin-header">
+                    <h2>Panel de Administración</h2>
+                    <button id="logout-btn" class="btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </button>
+                </div>
+
+                <!-- QR Code Section -->
+                <div class="qr-section">
+                    <h3>Código QR Único</h3>
+                    <p>Compartí este QR para que los usuarios se suscriban</p>
+                    <div class="qr-container">
+                        <canvas id="qr-code"></canvas>
+                    </div>
+                    <div class="qr-url">
+                        <code id="app-url">https://canchas.ajupam.ar/</code>
+                        <button id="copy-url" class="btn-icon" aria-label="Copiar URL">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="qr-actions">
+                        <button id="download-qr" class="btn-secondary">
+                            <i class="fas fa-download"></i>
+                            Descargar QR
+                        </button>
+                        <button id="print-qr" class="btn-secondary">
+                            <i class="fas fa-print"></i>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Courts Management -->
+                <div class="admin-courts-section">
+                    <div class="section-header">
+                        <h3>Gestión de Canchas</h3>
+                        <button id="add-court-btn" class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Agregar Cancha
+                        </button>
+                    </div>
+                    <div id="admin-courts-list" class="admin-courts-list">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Cargando canchas...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-section">
+                    <h3>Estadísticas</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-volleyball-ball"></i>
+                            <div class="stat-content">
+                                <span class="stat-value" id="total-courts">0</span>
+                                <span class="stat-label">Canchas Totales</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div class="stat-content">
+                                <span class="stat-value" id="total-subscribers">0</span>
+                                <span class="stat-label">Suscriptores Totales</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-bell"></i>
+                            <div class="stat-content">
+                                <span class="stat-value" id="active-subscriptions">0</span>
+                                <span class="stat-label">Suscripciones Activas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>Iniciar Sesión - Admin</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="admin-email">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input type="email" id="admin-email" required placeholder="admin@ajupam.ar">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">
+                        <i class="fas fa-lock"></i>
+                        Contraseña
+                    </label>
+                    <input type="password" id="admin-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary btn-block">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Court Modal -->
+    <div id="add-court-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>Agregar Nueva Cancha</h2>
+            <form id="add-court-form">
+                <div class="form-group">
+                    <label for="court-name">
+                        <i class="fas fa-volleyball-ball"></i>
+                        Nombre de la Cancha
+                    </label>
+                    <input type="text" id="court-name" required placeholder="Ej: Cancha 1">
+                </div>
+                <div class="form-group">
+                    <label for="court-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Ubicación (opcional)
+                    </label>
+                    <input type="text" id="court-location" placeholder="Ej: Club Deportivo Mendoza">
+                </div>
+                <button type="submit" class="btn-primary btn-block">
+                    <i class="fas fa-plus"></i>
+                    Agregar Cancha
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notification-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>Enviar Notificación</h2>
+            <p class="modal-description">
+                Enviar notificación a <strong id="notify-court-name"></strong>
+                (<span id="notify-subscribers-count">0</span> suscriptores)
+            </p>
+            <form id="notification-form">
+                <div class="form-group">
+                    <label for="notification-message">
+                        <i class="fas fa-comment-dots"></i>
+                        Mensaje
+                    </label>
+                    <textarea 
+                        id="notification-message" 
+                        required 
+                        rows="4" 
+                        placeholder="Ej: ¡Cancha disponible ahora!"
+                    ></textarea>
+                </div>
+                <button type="submit" class="btn-primary btn-block">
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar Notificación
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <script src="/js/firebase-config.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
