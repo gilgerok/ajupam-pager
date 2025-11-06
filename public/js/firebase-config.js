@@ -2,11 +2,7 @@
    FIREBASE CONFIGURATION
    AJUPAM PAGER - Configuración del Cliente
    ============================================ */
-// Configurar debug token para App Check
-   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-       self.FIREBASE_APPCHECK_DEBUG_TOKEN = 'TU_DEBUG_TOKEN_AQUI';
-   }
-   
+
 // Configuración Firebase - AJUPAM Pager
 const firebaseConfig = {
     apiKey: "AIzaSyC7qu6Egw1VFV76QIfmK-AQBKLqrmIAonc",
@@ -77,15 +73,36 @@ async function solicitarPermisosNotificacion() {
 // Función para obtener token FCM
 async function obtenerTokenFCM() {
     try {
-        const currentToken = await messaging.getToken({ vapidKey: vapidKey });
-        
-        if (currentToken) {
-            console.log('✅ Token FCM obtenido:', currentToken.substring(0, 20) + '...');
-            // Guardar token en variable global para usar en app.js
-            window.fcmToken = currentToken;
-            return currentToken;
+        // CRÍTICO: Esperar a que el Service Worker esté activo
+        if ('serviceWorker' in navigator) {
+            console.log('⏳ Esperando a que el Service Worker esté listo...');
+            
+            // Esperar a que el Service Worker esté registrado y activo
+            const registration = await navigator.serviceWorker.ready;
+            console.log('✅ Service Worker activo');
+            
+            // Dar un pequeño delay adicional para asegurar que esté completamente listo
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Ahora sí obtener el token con el Service Worker registration
+            const currentToken = await messaging.getToken({ 
+                vapidKey: vapidKey,
+                serviceWorkerRegistration: registration
+            });
+            
+            if (currentToken) {
+                console.log('✅ Token FCM obtenido:', currentToken.substring(0, 20) + '...');
+                console.log('📏 Longitud del token:', currentToken.length);
+                
+                // Guardar token en variable global para usar en app.js
+                window.fcmToken = currentToken;
+                return currentToken;
+            } else {
+                console.warn('⚠️ No se pudo obtener token FCM');
+                return null;
+            }
         } else {
-            console.warn('⚠️ No se pudo obtener token FCM');
+            console.error('❌ Service Workers no soportados en este navegador');
             return null;
         }
     } catch (error) {
@@ -98,6 +115,7 @@ async function obtenerTokenFCM() {
             console.warn('   4. Recarga la página (F5)');
         } else {
             console.error('❌ Error al obtener token FCM:', error.message);
+            console.error('Detalles completos:', error);
         }
         return null;
     }
@@ -119,8 +137,8 @@ messaging.onMessage((payload) => {
     const notificationTitle = payload.notification?.title || 'AJUPAM Pager';
     const notificationOptions = {
         body: payload.notification?.body || 'Nueva notificación',
-        icon: '/pager/icons/icon-192.png',
-        badge: '/pager/icons/icon-72.png',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-72.png',
         tag: 'ajupam-notification',
         requireInteraction: true,
         vibrate: [200, 100, 200],
