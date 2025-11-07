@@ -1,166 +1,84 @@
-/* ============================================
-   FIREBASE CONFIGURATION
-   AJUPAM PAGER - Configuración del Cliente
-   ============================================ */
+// firebase-config.js — AJUPAM Pager (producción)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
 
-// Configuración Firebase - AJUPAM Pager
+console.log("🚀 Inicializando Firebase...");
+
 const firebaseConfig = {
-    apiKey: "AIzaSyC7qu6Egw1VFV76QIfmK-AQBKLqrmIAonc",
-    authDomain: "ajupam-pager.firebaseapp.com",
-    projectId: "ajupam-pager",
-    storageBucket: "ajupam-pager.firebasestorage.app",
-    messagingSenderId: "580303243943",
-    appId: "1:580303243943:web:53becd2e3e4424cb1ba982"
+  apiKey: "AIzaSyC7qu6Egw1VFV76QIfmK-AQBKLqrmIAonc",
+  authDomain: "ajupam-pager.firebaseapp.com",
+  projectId: "ajupam-pager",
+  storageBucket: "ajupam-pager.firebasestorage.app",
+  messagingSenderId: "580303243943",
+  appId: "1:580303243943:web:54ceadac85f50a741ba982"
 };
 
-// VAPID Key para Cloud Messaging
-const vapidKey = "BDvXtlHcZfdSathkkJEk9N6WcHqtz5x7lVcmzQw4hNObLfhcW8XfS63UEKmRY-3JDWBLYGr5Lr7C4IqDkvJBSvA";
+// 🔑 VAPID KEY pública de tu proyecto (Firebase Console → Cloud Messaging → Configuración del SDK web)
+const VAPID_KEY = "BFjkS5J-gDu-SR9sj-K4zkyAQj1KKhBQg30lZ8CyU_8Y6z8z854QgAfL_u_AFmxt9Cv9TM_9R9QBYckc-ScI9LA";
 
-// Inicializar Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const messaging = getMessaging(app);
 
-// Referencias a los servicios
-const auth = firebase.auth();
-const db = firebase.firestore();
-const messaging = firebase.messaging();
+// ✅ Helper: obtener token de notificación con registro SW y permisos
+export async function getFCMToken() {
+  try {
+    console.log("🔑 Solicitando permiso de notificaciones...");
+    const permission = await Notification.requestPermission();
+    console.log("📋 Permiso actual:", permission);
+    if (permission !== "granted") {
+      console.warn("Permiso de notificaciones denegado por el usuario");
+      return null;
+    }
 
-// Configurar persistencia de Firestore (sin deprecation warning)
-db.enablePersistence({ synchronizeTabs: true })
-    .catch((err) => {
-        if (err.code === 'failed-precondition') {
-            console.warn('Persistencia no disponible: múltiples pestañas abiertas');
-        } else if (err.code === 'unimplemented') {
-            console.warn('Persistencia no disponible en este navegador');
-        }
+    console.log("🧱 Registrando Service Worker...");
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    console.log("📦 SW registrado:", registration);
+    console.log("📦 SW state:", registration.active?.state);
+
+    // 🔄 Esperar a que el SW esté activo y controlando la página
+    const swReady = await navigator.serviceWorker.ready;
+    console.log("🧩 SW listo, obteniendo token...");
+    console.log("🧩 SW activo:", swReady.active);
+
+    const token = await getToken(messaging, {
+      vapidKey: VAPID_KEY,
+      serviceWorkerRegistration: swReady
     });
 
-// Función para solicitar permisos de notificación
-async function solicitarPermisosNotificacion() {
-    try {
-        // Verificar si el navegador soporta notificaciones
-        if (!('Notification' in window)) {
-            console.warn('Este navegador no soporta notificaciones');
-            return null;
-        }
-
-        // Verificar estado actual del permiso
-        if (Notification.permission === 'granted') {
-            console.log('✅ Permisos de notificación ya otorgados');
-            return await obtenerTokenFCM();
-        } else if (Notification.permission === 'denied') {
-            console.warn('⚠️ Permisos de notificación bloqueados por el usuario');
-            console.warn('👉 Para habilitar: Haz clic en el candado 🔒 junto a la URL → Permisos → Notificaciones → Permitir');
-            return null;
-        } else {
-            // Permiso no solicitado aún (default)
-            console.log('📋 Solicitando permisos de notificación...');
-            const permission = await Notification.requestPermission();
-            
-            if (permission === 'granted') {
-                console.log('✅ Permisos otorgados');
-                return await obtenerTokenFCM();
-            } else {
-                console.warn('⚠️ Usuario rechazó los permisos de notificación');
-                return null;
-            }
-        }
-    } catch (error) {
-        console.error('❌ Error al solicitar permisos:', error);
-        return null;
+    if (token) {
+      console.log("✅ Token FCM obtenido:", token);
+      console.log("✅ Longitud del token:", token.length);
+      localStorage.setItem("fcm_token", token);
+      console.log("💾 Token guardado en localStorage");
+    } else {
+      console.warn("⚠️ No se obtuvo token FCM");
     }
+
+    return token;
+  } catch (error) {
+    console.error("❌ Error al obtener token FCM:", error);
+    console.error("❌ Error stack:", error.stack);
+    return null;
+  }
 }
 
-// Función para obtener token FCM
-async function obtenerTokenFCM() {
-    try {
-        // CRÍTICO: Esperar a que el Service Worker esté activo
-        if ('serviceWorker' in navigator) {
-            console.log('⏳ Esperando a que el Service Worker esté listo...');
-            
-            // Esperar a que el Service Worker esté registrado y activo
-            const registration = await navigator.serviceWorker.ready;
-            console.log('✅ Service Worker activo');
-            
-            // Dar un pequeño delay adicional para asegurar que esté completamente listo
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Ahora sí obtener el token con el Service Worker registration
-            const currentToken = await messaging.getToken({ 
-                vapidKey: vapidKey,
-                serviceWorkerRegistration: registration
-            });
-            
-            if (currentToken) {
-                console.log('✅ Token FCM obtenido:', currentToken.substring(0, 20) + '...');
-                console.log('📏 Longitud del token:', currentToken.length);
-                
-                // Guardar token en variable global para usar en app.js
-                window.fcmToken = currentToken;
-                return currentToken;
-            } else {
-                console.warn('⚠️ No se pudo obtener token FCM');
-                return null;
-            }
-        } else {
-            console.error('❌ Service Workers no soportados en este navegador');
-            return null;
-        }
-    } catch (error) {
-        if (error.code === 'messaging/permission-blocked') {
-            console.warn('⚠️ Permisos de notificación bloqueados');
-            console.warn('👉 Solución:');
-            console.warn('   1. Haz clic en el candado 🔒 (izquierda de la URL)');
-            console.warn('   2. Ve a "Configuración del sitio" o "Permisos"');
-            console.warn('   3. Cambia "Notificaciones" de "Bloquear" a "Permitir"');
-            console.warn('   4. Recarga la página (F5)');
-        } else {
-            console.error('❌ Error al obtener token FCM:', error.message);
-            console.error('Detalles completos:', error);
-        }
-        return null;
-    }
-}
 
-// NO solicitar permisos automáticamente al cargar
-// Los permisos se solicitarán cuando el usuario escanee un QR o intente suscribirse
-console.log('🔥 Firebase inicializado correctamente - AJUPAM Pager');
-console.log('📱 Para recibir notificaciones, escanea un código QR de cancha');
-
-// Exponer función globalmente para que app.js pueda usarla
-window.solicitarPermisosNotificacion = solicitarPermisosNotificacion;
-window.obtenerTokenFCM = obtenerTokenFCM;
-
-// Manejar mensajes cuando la app está en primer plano
-messaging.onMessage((payload) => {
-    console.log('📨 Mensaje recibido en primer plano:', payload);
-    
-    const notificationTitle = payload.notification?.title || 'AJUPAM Pager';
-    const notificationOptions = {
-        body: payload.notification?.body || 'Nueva notificación',
-        icon: '/icons/icon-192.png',
-        badge: '/icons/icon-72.png',
-        tag: 'ajupam-notification',
-        requireInteraction: true,
-        vibrate: [200, 100, 200],
-        data: payload.data
-    };
-    
-    // Mostrar notificación si hay permisos
-    if (Notification.permission === 'granted') {
-        new Notification(notificationTitle, notificationOptions);
-    }
-    
-    // También mostrar un toast en la app si la función existe
-    if (typeof showToast === 'function') {
-        showToast(payload.notification?.body || 'Nueva notificación', 'success');
-    }
+// Recepción de mensajes en foreground
+onMessage(messaging, payload => {
+  console.log("📩 [FOREGROUND] Mensaje recibido:", payload);
+  console.log("📩 [FOREGROUND] Notification data:", payload.notification);
+  console.log("📩 [FOREGROUND] Custom data:", payload.data);
+  const { title, body } = payload.notification || {};
+  if (Notification.permission === "granted") {
+    console.log("🔔 [FOREGROUND] Mostrando notificación:", title);
+    new Notification(title || "Notificación AJUPAM", { body });
+  } else {
+    console.warn("⚠️ [FOREGROUND] Permiso de notificación no concedido:", Notification.permission);
+  }
 });
 
-// Detectar cambios en el estado del Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then((registration) => {
-        console.log('✅ Service Worker listo:', registration.scope);
-    }).catch((error) => {
-        console.error('❌ Error con Service Worker:', error);
-    });
-}
+export { db, auth, messaging, VAPID_KEY };

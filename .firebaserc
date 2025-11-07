@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "ajupam-pager"
+  },
+  "targets": {
+    "ajupam-pager": {
+      "hosting": {
+        "canchas": [
+          "ajupam-pager"
+        ]
+      }
+    }
   }
 }
