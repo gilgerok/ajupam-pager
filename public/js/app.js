@@ -35,6 +35,7 @@ const goToUserBtn = document.getElementById("go-to-user");
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
 const addCourtBtn = document.getElementById("add-court-btn");
+const unsubscribeAllBtn = document.getElementById("unsubscribe-all-btn");
 const toastContainer = document.getElementById("toast-container");
 
 // ---------- UTILIDADES UI ----------
@@ -202,6 +203,7 @@ async function renderCourts() {
     }
 
     let token = localStorage.getItem("fcm_token") || null;
+    let hasSubscriptions = false;
 
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
@@ -232,6 +234,7 @@ async function renderCourts() {
 
       const subscribed = token ? await isTokenSubscribed(id, token) : false;
       if (subscribed) {
+        hasSubscriptions = true;
         btn.classList.add("subscribed");
         btnText.textContent = "Desuscribirme";
         btn.setAttribute("data-tooltip", "Cancelar suscripción a las notificaciones de esta cancha");
@@ -277,6 +280,13 @@ async function renderCourts() {
           }
         }
       });
+    }
+
+    // Mostrar/ocultar botón "Desactivar todas"
+    if (hasSubscriptions) {
+      unsubscribeAllBtn.style.display = "inline-flex";
+    } else {
+      unsubscribeAllBtn.style.display = "none";
     }
   } catch (err) {
     console.error("renderCourts error:", err);
@@ -432,6 +442,47 @@ addCourtBtn.addEventListener("click", async () => {
   showToast("Cancha creada", "success");
   renderAdminCourts();
   renderCourts();
+});
+
+// Desactivar todas las notificaciones
+unsubscribeAllBtn.addEventListener("click", async () => {
+  const confirmed = await showConfirm(
+    "Cancelar todas las notificaciones",
+    "¿Estás seguro de desuscribirte de todas las canchas? Dejarás de recibir notificaciones."
+  );
+
+  if (!confirmed) return;
+
+  const token = localStorage.getItem("fcm_token");
+  if (!token) {
+    showToast("No tenés suscripciones activas", "info");
+    return;
+  }
+
+  unsubscribeAllBtn.classList.add("loading");
+
+  try {
+    const courtsSnap = await getDocs(collection(db, "courts"));
+    let unsubscribedCount = 0;
+
+    for (const courtDoc of courtsSnap.docs) {
+      const success = await unsubscribeFromCourt(courtDoc.id, token);
+      if (success) unsubscribedCount++;
+    }
+
+    unsubscribeAllBtn.classList.remove("loading");
+
+    if (unsubscribedCount > 0) {
+      showToast(`Te desuscribiste de ${unsubscribedCount} ${unsubscribedCount === 1 ? 'cancha' : 'canchas'}`, "success");
+      renderCourts();
+    } else {
+      showToast("No tenías suscripciones activas", "info");
+    }
+  } catch (err) {
+    console.error("Error al desuscribirse de todas:", err);
+    unsubscribeAllBtn.classList.remove("loading");
+    showToast("Error al cancelar suscripciones", "error");
+  }
 });
 
 // ---------- OBSERVADOR DE SESIÓN ----------
