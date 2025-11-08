@@ -51,6 +51,103 @@ function showToast(text, type = "info") {
   setTimeout(() => el.remove(), 3500);
 }
 
+// ---------- MODALES MODERNOS ----------
+function showModal(title, description, placeholder = "") {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("modal-overlay");
+    const titleEl = document.getElementById("modal-title");
+    const descEl = document.getElementById("modal-description");
+    const input = document.getElementById("modal-input");
+    const confirmBtn = document.getElementById("modal-confirm-btn");
+    const cancelBtn = document.getElementById("modal-cancel-btn");
+    const closeBtn = document.getElementById("modal-close-btn");
+
+    titleEl.textContent = title;
+    descEl.textContent = description;
+    input.value = "";
+    input.placeholder = placeholder;
+    overlay.classList.remove("hidden");
+
+    setTimeout(() => input.focus(), 100);
+
+    const cleanup = () => {
+      overlay.classList.add("hidden");
+      confirmBtn.removeEventListener("click", onConfirm);
+      cancelBtn.removeEventListener("click", onCancel);
+      closeBtn.removeEventListener("click", onCancel);
+      overlay.removeEventListener("click", onOverlayClick);
+      input.removeEventListener("keypress", onEnter);
+    };
+
+    const onConfirm = () => {
+      const value = input.value.trim();
+      cleanup();
+      resolve(value || null);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(null);
+    };
+
+    const onOverlayClick = (e) => {
+      if (e.target === overlay) onCancel();
+    };
+
+    const onEnter = (e) => {
+      if (e.key === "Enter") onConfirm();
+    };
+
+    confirmBtn.addEventListener("click", onConfirm);
+    cancelBtn.addEventListener("click", onCancel);
+    closeBtn.addEventListener("click", onCancel);
+    overlay.addEventListener("click", onOverlayClick);
+    input.addEventListener("keypress", onEnter);
+  });
+}
+
+function showConfirm(title, description) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById("confirm-overlay");
+    const titleEl = document.getElementById("confirm-title");
+    const descEl = document.getElementById("confirm-description");
+    const okBtn = document.getElementById("confirm-ok-btn");
+    const cancelBtn = document.getElementById("confirm-cancel-btn");
+    const closeBtn = document.getElementById("confirm-close-btn");
+
+    titleEl.textContent = title;
+    descEl.textContent = description;
+    overlay.classList.remove("hidden");
+
+    const cleanup = () => {
+      overlay.classList.add("hidden");
+      okBtn.removeEventListener("click", onOk);
+      cancelBtn.removeEventListener("click", onCancel);
+      closeBtn.removeEventListener("click", onCancel);
+      overlay.removeEventListener("click", onOverlayClick);
+    };
+
+    const onOk = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const onCancel = () => {
+      cleanup();
+      resolve(false);
+    };
+
+    const onOverlayClick = (e) => {
+      if (e.target === overlay) onCancel();
+    };
+
+    okBtn.addEventListener("click", onOk);
+    cancelBtn.addEventListener("click", onCancel);
+    closeBtn.addEventListener("click", onCancel);
+    overlay.addEventListener("click", onOverlayClick);
+  });
+}
+
 // ---------- FIRESTORE HELPERS ----------
 async function getSubscribersCount(courtId) {
   const subsSnap = await getDocs(collection(db, "courts", courtId, "subscribers"));
@@ -215,7 +312,11 @@ async function renderAdminCourts() {
 
       // editar
       card.querySelector(".btn-edit").addEventListener("click", async () => {
-        const nuevo = prompt("Nuevo nombre de cancha:", data.name);
+        const nuevo = await showModal(
+          "Editar cancha",
+          "Ingresá el nuevo nombre para la cancha:",
+          data.name
+        );
         if (nuevo) {
           await updateDoc(doc(db, "courts", id), { name: nuevo });
           showToast("Cancha actualizada", "success");
@@ -225,7 +326,11 @@ async function renderAdminCourts() {
 
       // eliminar
       card.querySelector(".btn-delete").addEventListener("click", async () => {
-        if (!confirm("¿Eliminar cancha?")) return;
+        const confirmed = await showConfirm(
+          "Eliminar cancha",
+          `¿Estás seguro de eliminar "${data.name}"? Esta acción no se puede deshacer.`
+        );
+        if (!confirmed) return;
         await deleteDoc(doc(db, "courts", id));
         showToast("Cancha eliminada", "info");
         renderAdminCourts();
@@ -233,7 +338,14 @@ async function renderAdminCourts() {
 
       // notificar
       card.querySelector(".btn-notify").addEventListener("click", async () => {
-        const msg = prompt("Mensaje opcional (dejar vacío para predeterminado):");
+        const msg = await showModal(
+          "Enviar notificación",
+          `Enviá una notificación a los suscriptores de "${data.name}":`,
+          "Ingresá el mensaje (opcional)"
+        );
+
+        if (msg === null) return; // Usuario canceló
+
         const subsSnap = await getDocs(collection(db, "courts", id, "subscribers"));
         const tokens = subsSnap.docs.map(d => d.data().token).filter(Boolean);
 
@@ -296,7 +408,11 @@ adminAccessLink.addEventListener("click", e => {
 goToUserBtn.addEventListener("click", () => showView(userView));
 
 addCourtBtn.addEventListener("click", async () => {
-  const nombre = prompt("Nombre de la nueva cancha:");
+  const nombre = await showModal(
+    "Agregar cancha",
+    "Ingresá el nombre de la nueva cancha:",
+    "Ej: Cancha 1"
+  );
   if (!nombre) return;
   await addDoc(collection(db, "courts"), {
     name: nombre,
