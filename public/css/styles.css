@@ -1328,3 +1328,112 @@ textarea.form-control {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* ============================================
+   MODAL PWA INSTALACIÓN
+   ============================================ */
+.pwa-install-dialog {
+    max-width: 450px;
+}
+
+.pwa-install-content {
+    padding: 2rem;
+    text-align: center;
+}
+
+.pwa-install-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0052a3 100%);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 102, 204, 0.3);
+}
+
+.pwa-install-icon img {
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-md);
+}
+
+.pwa-install-content h2 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--dark-gray);
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+
+.pwa-install-description {
+    color: var(--medium-gray);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.pwa-install-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--light-gray);
+    border-radius: var(--radius-md);
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+}
+
+.feature-item span {
+    font-size: 0.875rem;
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+.pwa-install-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pwa-install-actions .btn-link {
+    background: none;
+    border: none;
+    color: var(--medium-gray);
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.pwa-install-actions .btn-link:hover {
+    color: var(--dark-gray);
+    text-decoration: underline;
+}
+
+/* Responsive PWA modal */
+@media (max-width: 768px) {
+    .pwa-install-content {
+        padding: 1.5rem;
+    }
+
+    .pwa-install-features {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .feature-item {
+        flex-direction: row;
+        justify-content: center;
+    }
+}

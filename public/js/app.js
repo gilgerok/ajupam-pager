@@ -485,6 +485,51 @@ unsubscribeAllBtn.addEventListener("click", async () => {
   }
 });
 
+// ---------- PWA INSTALACIÓN ----------
+let deferredPrompt;
+
+// Capturar el evento beforeinstallprompt
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log("📱 PWA instalable detectada");
+});
+
+// Mostrar modal PWA en primera visita
+function showPWAInstallModal() {
+  const overlay = document.getElementById("pwa-install-overlay");
+  const installBtn = document.getElementById("pwa-install-btn");
+  const continueBtn = document.getElementById("pwa-continue-browser-btn");
+
+  overlay.classList.remove("hidden");
+
+  installBtn.addEventListener("click", async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`Usuario ${outcome === "accepted" ? "aceptó" : "rechazó"} la instalación`);
+      deferredPrompt = null;
+    }
+    overlay.classList.add("hidden");
+    localStorage.setItem("pwa_prompt_shown", "true");
+  });
+
+  continueBtn.addEventListener("click", () => {
+    overlay.classList.add("hidden");
+    localStorage.setItem("pwa_prompt_shown", "true");
+  });
+}
+
+// Verificar si es primera visita (después de un delay para no ser intrusivo)
+setTimeout(() => {
+  const hasSeenPrompt = localStorage.getItem("pwa_prompt_shown");
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+
+  if (!hasSeenPrompt && !isStandalone && deferredPrompt) {
+    showPWAInstallModal();
+  }
+}, 3000); // Esperar 3 segundos antes de mostrar
+
 // ---------- OBSERVADOR DE SESIÓN ----------
 onAuthStateChanged(auth, user => {
   if (user) {

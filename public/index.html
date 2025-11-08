@@ -179,6 +179,44 @@
     </div>
   </div>
 
+  <!-- Modal PWA Install -->
+  <div id="pwa-install-overlay" class="modal-overlay hidden">
+    <div class="modal-dialog pwa-install-dialog">
+      <div class="pwa-install-content">
+        <div class="pwa-install-icon">
+          <img src="icons/icon-192.png" alt="AJUPAM Pager" />
+        </div>
+        <h2>¡Instalá AJUPAM Pager!</h2>
+        <p class="pwa-install-description">
+          Recibí notificaciones instantáneas cuando las canchas estén disponibles.
+          Instalá la aplicación para tener acceso rápido desde tu pantalla de inicio.
+        </p>
+        <div class="pwa-install-features">
+          <div class="feature-item">
+            <i class="fas fa-bolt"></i>
+            <span>Acceso instantáneo</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-bell"></i>
+            <span>Notificaciones push</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Funciona sin conexión</span>
+          </div>
+        </div>
+        <div class="pwa-install-actions">
+          <button class="btn btn-primary btn-block" id="pwa-install-btn">
+            <i class="fas fa-download"></i> Instalar aplicación
+          </button>
+          <button class="btn btn-link" id="pwa-continue-browser-btn">
+            Continuar en el navegador
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script type="module" src="js/firebase-config.js"></script>
   <script type="module" src="js/app.js"></script>
