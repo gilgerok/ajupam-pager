@@ -248,10 +248,14 @@ async function renderCourts() {
         }
 
         const subscribed = btn.classList.contains("subscribed");
+        btn.classList.add("loading");
+
         if (!subscribed) {
           const ok = await subscribeToCourt(id, token);
+          btn.classList.remove("loading");
           if (ok) {
-            btn.classList.add("subscribed");
+            btn.classList.add("subscribed", "success-animation");
+            setTimeout(() => btn.classList.remove("success-animation"), 400);
             btnText.textContent = "Desuscribirme";
             btn.setAttribute("data-tooltip", "Cancelar suscripción a las notificaciones de esta cancha");
             const newCount = await getSubscribersCount(id);
@@ -261,6 +265,7 @@ async function renderCourts() {
           }
         } else {
           const ok = await unsubscribeFromCourt(id, token);
+          btn.classList.remove("loading");
           if (ok) {
             btn.classList.remove("subscribed");
             btnText.textContent = "Notificarme";

@@ -1221,3 +1221,110 @@ textarea.form-control {
         text-align: center;
     }
 }
+
+/* ============================================
+   ANIMACIONES Y FEEDBACK VISUAL
+   ============================================ */
+
+/* Loading state en botones */
+.btn.loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: btnSpin 0.6s linear infinite;
+    color: var(--white);
+}
+
+@keyframes btnSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Animación de éxito al suscribirse */
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.btn-subscribe.success-animation {
+    animation: successPulse 0.4s ease;
+}
+
+/* Animación de entrada de cards */
+.court-card {
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+}
+
+.court-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.court-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.court-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.court-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.court-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover mejorado en cards */
+.court-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.court-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Admin cards hover */
+.admin-court-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-court-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
