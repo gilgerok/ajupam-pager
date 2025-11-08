@@ -318,6 +318,3 @@ onAuthStateChanged(auth, user => {
     renderCourts();
   }
 });
-
-// ---------- INICIO ----------
-renderCourts();
