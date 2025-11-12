@@ -9,7 +9,8 @@ import {
   addDoc,
   deleteDoc,
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  where
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import {
   signInWithEmailAndPassword,
@@ -529,6 +530,175 @@ setTimeout(() => {
     showPWAInstallModal();
   }
 }, 3000); // Esperar 3 segundos antes de mostrar
+
+// ---------- SISTEMA DE NOTIFICACIONES ----------
+const notificationsBtn = document.getElementById("notifications-btn");
+const notificationsBadge = document.getElementById("notifications-badge");
+const notificationsPanel = document.getElementById("notifications-panel");
+const notificationsList = document.getElementById("notifications-list");
+const closeNotificationsBtn = document.getElementById("close-notifications-btn");
+const markAllReadBtn = document.getElementById("mark-all-read-btn");
+
+// Abrir/cerrar panel
+notificationsBtn?.addEventListener("click", () => {
+  notificationsPanel.classList.toggle("open");
+  if (notificationsPanel.classList.contains("open")) {
+    loadNotifications();
+  }
+});
+
+closeNotificationsBtn?.addEventListener("click", () => {
+  notificationsPanel.classList.remove("open");
+});
+
+// Marcar todas como leídas
+markAllReadBtn?.addEventListener("click", async () => {
+  const token = localStorage.getItem("fcm_token");
+  if (!token) return;
+
+  try {
+    const notifRef = collection(db, "notifications", token, "messages");
+    const q = query(notifRef, where("read", "==", false));
+    const snapshot = await getDocs(q);
+
+    const updatePromises = snapshot.docs.map(doc =>
+      updateDoc(doc.ref, { read: true })
+    );
+    await Promise.all(updatePromises);
+
+    showToast("Todas las notificaciones marcadas como leídas", "success");
+    loadNotifications();
+    updateNotificationBadge();
+  } catch (error) {
+    console.error("Error marcando como leídas:", error);
+    showToast("Error al marcar notificaciones", "error");
+  }
+});
+
+// Cargar notificaciones desde Firestore
+async function loadNotifications() {
+  const token = localStorage.getItem("fcm_token");
+  if (!token) {
+    notificationsList.innerHTML = `
+      <div class="notifications-empty">
+        <i class="fas fa-bell-slash"></i>
+        <p>Suscribite a una cancha para recibir notificaciones</p>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    const { query: fsQuery, where, orderBy: fsOrderBy, limit } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
+    const notifRef = collection(db, "notifications", token, "messages");
+    const q = fsQuery(notifRef, fsOrderBy("timestamp", "desc"), limit(50));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      notificationsList.innerHTML = `
+        <div class="notifications-empty">
+          <i class="fas fa-bell-slash"></i>
+          <p>No tenés notificaciones</p>
+        </div>
+      `;
+      return;
+    }
+
+    notificationsList.innerHTML = "";
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const notifEl = createNotificationElement(doc.id, data);
+      notificationsList.appendChild(notifEl);
+    });
+  } catch (error) {
+    console.error("Error cargando notificaciones:", error);
+    notificationsList.innerHTML = `
+      <div class="notifications-empty">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Error cargando notificaciones</p>
+      </div>
+    `;
+  }
+}
+
+// Crear elemento de notificación
+function createNotificationElement(id, data) {
+  const div = document.createElement("div");
+  div.className = `notification-item ${data.read ? "" : "unread"}`;
+
+  const timeAgo = data.timestamp
+    ? getTimeAgo(data.timestamp.toDate())
+    : "Hace un momento";
+
+  div.innerHTML = `
+    <div class="notification-item-header">
+      <div class="notification-item-title">${data.title || "Notificación"}</div>
+      <div class="notification-item-time">${timeAgo}</div>
+    </div>
+    <div class="notification-item-body">${data.body || ""}</div>
+  `;
+
+  // Marcar como leída al hacer clic
+  div.addEventListener("click", async () => {
+    if (!data.read) {
+      const token = localStorage.getItem("fcm_token");
+      const docRef = doc(db, "notifications", token, "messages", id);
+      await updateDoc(docRef, { read: true });
+      div.classList.remove("unread");
+      updateNotificationBadge();
+    }
+  });
+
+  return div;
+}
+
+// Formatear tiempo relativo
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+
+  if (seconds < 60) return "Ahora";
+  if (seconds < 3600) return `Hace ${Math.floor(seconds / 60)} min`;
+  if (seconds < 86400) return `Hace ${Math.floor(seconds / 3600)} hs`;
+  if (seconds < 604800) return `Hace ${Math.floor(seconds / 86400)} días`;
+  return date.toLocaleDateString("es-AR");
+}
+
+// Actualizar badge de notificaciones
+async function updateNotificationBadge() {
+  const token = localStorage.getItem("fcm_token");
+  if (!token) {
+    notificationsBadge.classList.add("hidden");
+    return;
+  }
+
+  try {
+    const { query: fsQuery, where } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
+    const notifRef = collection(db, "notifications", token, "messages");
+    const q = fsQuery(notifRef, where("read", "==", false));
+    const snapshot = await getDocs(q);
+
+    const count = snapshot.size;
+    if (count > 0) {
+      notificationsBadge.textContent = count > 99 ? "99+" : count;
+      notificationsBadge.classList.remove("hidden");
+    } else {
+      notificationsBadge.classList.add("hidden");
+    }
+  } catch (error) {
+    console.error("Error actualizando badge:", error);
+  }
+}
+
+// Escuchar evento de nueva notificación
+window.addEventListener("newNotification", () => {
+  updateNotificationBadge();
+  if (notificationsPanel.classList.contains("open")) {
+    loadNotifications();
+  }
+});
+
+// Actualizar badge al cargar la página
+updateNotificationBadge();
 
 // ---------- OBSERVADOR DE SESIÓN ----------
 onAuthStateChanged(auth, user => {

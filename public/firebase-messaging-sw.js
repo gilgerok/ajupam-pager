@@ -4,6 +4,7 @@
 
 importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js");
 
 // 🔧 Configuración del proyecto (igual que en firebase-config.js)
 firebase.initializeApp({
@@ -15,18 +16,20 @@ firebase.initializeApp({
   appId: "1:580303243943:web:54ceadac85f50a741ba982"
 });
 
-// Inicializamos Messaging
+// Inicializamos Messaging y Firestore
 const messaging = firebase.messaging();
+const db = firebase.firestore();
 
 // Escucha los mensajes en segundo plano (cuando la app está cerrada o en otra pestaña)
-messaging.onBackgroundMessage((payload) => {
+messaging.onBackgroundMessage(async (payload) => {
   console.log("📨 [SW] Mensaje recibido en segundo plano:", payload);
   console.log("📨 [SW] Notification data:", payload.notification);
   console.log("📨 [SW] Custom data:", payload.data);
 
   const notificationTitle = payload.notification?.title || "Notificación AJUPAM";
+  const notificationBody = payload.notification?.body || "Hay una actualización disponible.";
   const notificationOptions = {
-    body: payload.notification?.body || "Hay una actualización disponible.",
+    body: notificationBody,
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-72.png",
     data: payload.data || {},
@@ -38,9 +41,45 @@ messaging.onBackgroundMessage((payload) => {
     ]
   };
 
+  // 💾 Guardar notificación en Firestore
+  try {
+    const token = localStorage.getItem("fcm_token");
+    if (token) {
+      await db.collection("notifications").doc(token).collection("messages").add({
+        title: notificationTitle,
+        body: notificationBody,
+        data: payload.data || {},
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false
+      });
+      console.log("✅ [SW] Notificación guardada en Firestore");
+
+      // Actualizar badge del navegador
+      if (self.registration && 'setAppBadge' in navigator) {
+        const unreadCount = await getUnreadCount(token);
+        await navigator.setAppBadge(unreadCount);
+      }
+    }
+  } catch (error) {
+    console.error("❌ [SW] Error guardando notificación:", error);
+  }
+
   console.log("🔔 [SW] Mostrando notificación:", notificationTitle);
   return self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+// Helper para obtener cantidad de notificaciones no leídas
+async function getUnreadCount(token) {
+  try {
+    const snapshot = await db.collection("notifications").doc(token).collection("messages")
+      .where("read", "==", false)
+      .get();
+    return snapshot.size;
+  } catch (error) {
+    console.error("❌ Error obteniendo count:", error);
+    return 0;
+  }
+}
 
 // ✅ Control de clientes y logs
 self.addEventListener("activate", (event) => {
