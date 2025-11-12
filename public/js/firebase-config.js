@@ -1,4 +1,4 @@
-// firebase-config.js — AJUPAM Pager (producción)
+// firebase-config.js — Playoffs Liga Ajupam (producción)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
@@ -82,7 +82,7 @@ onMessage(messaging, async (payload) => {
       const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
       const notifRef = collection(db, "notifications", token, "messages");
       await addDoc(notifRef, {
-        title: title || "Notificación AJUPAM",
+        title: title || "Playoffs Liga Ajupam",
         body: body || "Hay una actualización disponible.",
         data: payload.data || {},
         timestamp: serverTimestamp(),
@@ -99,7 +99,7 @@ onMessage(messaging, async (payload) => {
 
   if (Notification.permission === "granted") {
     console.log("🔔 [FOREGROUND] Mostrando notificación:", title);
-    new Notification(title || "Notificación AJUPAM", { body });
+    new Notification(title || "Playoffs Liga Ajupam", { body });
   } else {
     console.warn("⚠️ [FOREGROUND] Permiso de notificación no concedido:", Notification.permission);
   }

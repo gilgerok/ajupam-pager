@@ -1,5 +1,5 @@
 /* ============================================================
-   🔥 Firebase Messaging Service Worker — AJUPAM Pager
+   🔥 Firebase Messaging Service Worker — Playoffs Liga Ajupam
    ============================================================ */
 
 importScripts("https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js");
@@ -26,7 +26,7 @@ messaging.onBackgroundMessage(async (payload) => {
   console.log("📨 [SW] Notification data:", payload.notification);
   console.log("📨 [SW] Custom data:", payload.data);
 
-  const notificationTitle = payload.notification?.title || "Notificación AJUPAM";
+  const notificationTitle = payload.notification?.title || "Playoffs Liga Ajupam";
   const notificationBody = payload.notification?.body || "Hay una actualización disponible.";
   const notificationOptions = {
     body: notificationBody,

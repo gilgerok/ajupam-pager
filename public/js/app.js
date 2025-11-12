@@ -1,4 +1,4 @@
-// app.js — AJUPAM Pager
+// app.js — Playoffs Liga Ajupam
 import { db, auth, getFCMToken } from "./firebase-config.js";
 import {
   collection,
@@ -218,11 +218,11 @@ async function renderCourts() {
           <h3>${data.name}</h3>
           <div>
             <span class="court-status ${data.status === "Disponible" ? "status-available" : "status-unavailable"}">${data.status}</span>
-            <span class="court-badge" data-tooltip="${subsCount} ${subsCount === 1 ? 'persona suscrita' : 'personas suscriptas'} a esta cancha">${subsCount} suscriptores</span>
+            <span class="court-badge">${subsCount} suscriptores</span>
           </div>
         </div>
         <div class="court-actions">
-          <button class="btn btn-primary btn-subscribe" data-id="${id}" data-tooltip="Recibí una notificación cuando esta cancha esté disponible">
+          <button class="btn btn-primary btn-subscribe" data-id="${id}">
             <i class="fas fa-bell"></i> <span class="btn-text">Notificarme</span>
           </button>
         </div>
@@ -238,7 +238,6 @@ async function renderCourts() {
         hasSubscriptions = true;
         btn.classList.add("subscribed");
         btnText.textContent = "Desuscribirme";
-        btn.setAttribute("data-tooltip", "Cancelar suscripción a las notificaciones de esta cancha");
       }
 
       btn.addEventListener("click", async () => {
@@ -261,10 +260,8 @@ async function renderCourts() {
             btn.classList.add("subscribed", "success-animation");
             setTimeout(() => btn.classList.remove("success-animation"), 400);
             btnText.textContent = "Desuscribirme";
-            btn.setAttribute("data-tooltip", "Cancelar suscripción a las notificaciones de esta cancha");
             const newCount = await getSubscribersCount(id);
             badge.textContent = `${newCount} suscriptores`;
-            badge.setAttribute("data-tooltip", `${newCount} ${newCount === 1 ? 'persona suscrita' : 'personas suscriptas'} a esta cancha`);
             showToast("Te suscribiste a la cancha", "success");
           }
         } else {
@@ -273,10 +270,8 @@ async function renderCourts() {
           if (ok) {
             btn.classList.remove("subscribed");
             btnText.textContent = "Notificarme";
-            btn.setAttribute("data-tooltip", "Recibí una notificación cuando esta cancha esté disponible");
             const newCount = await getSubscribersCount(id);
             badge.textContent = `${newCount} suscriptores`;
-            badge.setAttribute("data-tooltip", `${newCount} ${newCount === 1 ? 'persona suscrita' : 'personas suscriptas'} a esta cancha`);
             showToast("Te desuscribiste", "info");
           }
         }
@@ -319,13 +314,13 @@ async function renderAdminCourts() {
         <div class="admin-court-header">
           <h4>${data.name}</h4>
           <div class="admin-court-actions">
-            <button class="btn btn-primary btn-edit" data-id="${id}" data-tooltip="Editar nombre de cancha"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-secondary btn-notify" data-id="${id}" data-tooltip="Enviar notificación a suscriptores"><i class="fas fa-paper-plane"></i></button>
-            <button class="btn btn-danger btn-delete" data-id="${id}" data-tooltip="Eliminar cancha"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-primary btn-edit" data-id="${id}"><i class="fas fa-pen"></i></button>
+            <button class="btn btn-secondary btn-notify" data-id="${id}"><i class="fas fa-paper-plane"></i></button>
+            <button class="btn btn-danger btn-delete" data-id="${id}"><i class="fas fa-trash"></i></button>
           </div>
         </div>
         <div class="admin-court-stats">
-          <span data-tooltip="${subsCount} ${subsCount === 1 ? 'persona suscrita' : 'personas suscriptas'}">${subsCount} suscriptores</span> ·
+          <span>${subsCount} suscriptores</span> ·
           <span>${data.status || "Disponible"}</span>
         </div>
       `;
