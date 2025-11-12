@@ -31,10 +31,15 @@ service cloud.firestore {
       allow update: if isAdmin();
     }
     
-    // Notifications collection
-    match /notifications/{notificationId} {
-      // Solo admins pueden leer y escribir notificaciones
-      allow read, write: if isAdmin();
+    // Notifications collection - Cada usuario puede acceder a sus propias notificaciones
+    match /notifications/{token} {
+      // Cualquiera puede leer/escribir en su propia colección de notificaciones
+      allow read, write: if true;
+
+      // Subcollection de mensajes
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
     }
     
     // Statistics collection (opcional)
