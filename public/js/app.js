@@ -34,14 +34,27 @@ const adminCourtsList = document.getElementById("admin-courts-list");
 const goToUserBtn = document.getElementById("go-to-user");
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
+const headerLogoutBtn = document.getElementById("header-logout-btn");
 const addCourtBtn = document.getElementById("add-court-btn");
 const unsubscribeAllBtn = document.getElementById("unsubscribe-all-btn");
 const toastContainer = document.getElementById("toast-container");
+const notificationsBtn = document.getElementById("notifications-btn");
 
 // ---------- UTILIDADES UI ----------
 function showView(viewEl) {
   [userView, authView, adminView].forEach(v => v.classList.add("hidden"));
   viewEl.classList.remove("hidden");
+
+  // Alternar botones del header según la vista
+  if (viewEl === adminView) {
+    // En admin: mostrar logout, ocultar notificaciones
+    notificationsBtn.classList.add("hidden");
+    headerLogoutBtn.classList.remove("hidden");
+  } else {
+    // En otras vistas: mostrar notificaciones, ocultar logout
+    notificationsBtn.classList.remove("hidden");
+    headerLogoutBtn.classList.add("hidden");
+  }
 }
 
 function showToast(text, type = "info") {
@@ -411,6 +424,15 @@ loginForm.addEventListener("submit", async e => {
 logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   showToast("Sesión cerrada", "info");
+  showView(userView);
+  renderCourts();
+});
+
+// Logout desde el header (mismo comportamiento)
+headerLogoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  showToast("Sesión cerrada", "info");
+  window.location.hash = "";
   showView(userView);
   renderCourts();
 });

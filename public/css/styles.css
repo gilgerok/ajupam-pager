@@ -86,23 +86,38 @@ body {
 }
 
 /* Asegurar que los iconos Font Awesome se renderizan correctamente */
-i.fas, i.far, i.fal, i.fad, i.fab {
+i.fas, i.far, i.fal, i.fad, i.fab,
+.fas, .far, .fal, .fad, .fab {
     font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
     font-style: normal !important;
     font-variant: normal !important;
     text-rendering: auto !important;
     -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
     font-weight: 900 !important;  /* Solid icons weight */
     display: inline-block !important;
+    line-height: 1 !important;
 }
 
-i.far {
+i.far, .far {
     font-weight: 400 !important;  /* Regular icons weight */
 }
 
-i.fab {
+i.fab, .fab {
     font-family: "Font Awesome 6 Brands" !important;
     font-weight: 400 !important;
+}
+
+/* Asegurar que los íconos en botones se vean bien */
+.btn i.fas, .btn i.far, .btn i.fab,
+.btn .fas, .btn .far, .btn .fab {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.btn i.fas:only-child, .btn i.far:only-child, .btn i.fab:only-child,
+.btn .fas:only-child, .btn .far:only-child, .btn .fab:only-child {
+    margin-right: 0;
 }
 
 /* ============================================
