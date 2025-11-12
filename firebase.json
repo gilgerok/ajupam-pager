@@ -6,6 +6,7 @@
     "source": "functions"
   },
   "hosting": {
+    "target": "canchas",
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
