@@ -700,6 +700,29 @@ window.addEventListener("newNotification", () => {
 // Actualizar badge al cargar la página
 updateNotificationBadge();
 
+// Limpiar Badge API nativo cuando la app está en foco
+window.addEventListener("focus", async () => {
+  if ("clearAppBadge" in navigator) {
+    try {
+      await navigator.clearAppBadge();
+      console.log("✅ Badge nativo limpiado");
+    } catch (error) {
+      console.error("❌ Error limpiando badge nativo:", error);
+    }
+  }
+});
+
+// Limpiar badge cuando se abre el panel de notificaciones
+notificationsBtn?.addEventListener("click", async () => {
+  if ("clearAppBadge" in navigator) {
+    try {
+      await navigator.clearAppBadge();
+    } catch (error) {
+      console.error("❌ Error limpiando badge:", error);
+    }
+  }
+});
+
 // ---------- OBSERVADOR DE SESIÓN ----------
 onAuthStateChanged(auth, user => {
   if (user) {
