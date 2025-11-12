@@ -68,11 +68,35 @@ export async function getFCMToken() {
 
 
 // Recepción de mensajes en foreground
-onMessage(messaging, payload => {
+onMessage(messaging, async (payload) => {
   console.log("📩 [FOREGROUND] Mensaje recibido:", payload);
   console.log("📩 [FOREGROUND] Notification data:", payload.notification);
   console.log("📩 [FOREGROUND] Custom data:", payload.data);
+
   const { title, body } = payload.notification || {};
+
+  // 💾 Guardar notificación en Firestore
+  try {
+    const token = localStorage.getItem("fcm_token");
+    if (token) {
+      const { addDoc, collection, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js");
+      const notifRef = collection(db, "notifications", token, "messages");
+      await addDoc(notifRef, {
+        title: title || "Notificación AJUPAM",
+        body: body || "Hay una actualización disponible.",
+        data: payload.data || {},
+        timestamp: serverTimestamp(),
+        read: false
+      });
+      console.log("✅ [FOREGROUND] Notificación guardada en Firestore");
+
+      // Disparar evento personalizado para actualizar UI
+      window.dispatchEvent(new CustomEvent("newNotification"));
+    }
+  } catch (error) {
+    console.error("❌ [FOREGROUND] Error guardando notificación:", error);
+  }
+
   if (Notification.permission === "granted") {
     console.log("🔔 [FOREGROUND] Mostrando notificación:", title);
     new Notification(title || "Notificación AJUPAM", { body });
