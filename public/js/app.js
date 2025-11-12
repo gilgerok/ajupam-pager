@@ -531,6 +531,118 @@ setTimeout(() => {
   }
 }, 3000); // Esperar 3 segundos antes de mostrar
 
+// ---------- BROADCAST NOTIFICATIONS (ADMIN) ----------
+const broadcastBtn = document.getElementById("broadcast-btn");
+const broadcastOverlay = document.getElementById("broadcast-overlay");
+const broadcastCloseBtn = document.getElementById("broadcast-close-btn");
+const broadcastCancelBtn = document.getElementById("broadcast-cancel-btn");
+const broadcastSendBtn = document.getElementById("broadcast-send-btn");
+const broadcastTitle = document.getElementById("broadcast-title");
+const broadcastMessage = document.getElementById("broadcast-message");
+const broadcastCount = document.getElementById("broadcast-count");
+
+// Abrir modal broadcast
+broadcastBtn?.addEventListener("click", async () => {
+  // Obtener cantidad de suscriptores únicos
+  const uniqueTokens = await getAllUniqueTokens();
+  broadcastCount.textContent = `${uniqueTokens.length} suscriptor${uniqueTokens.length !== 1 ? "es" : ""}`;
+
+  broadcastTitle.value = "";
+  broadcastMessage.value = "";
+  broadcastOverlay.classList.remove("hidden");
+  setTimeout(() => broadcastTitle.focus(), 100);
+});
+
+// Cerrar modal
+broadcastCloseBtn?.addEventListener("click", () => {
+  broadcastOverlay.classList.add("hidden");
+});
+
+broadcastCancelBtn?.addEventListener("click", () => {
+  broadcastOverlay.classList.add("hidden");
+});
+
+// Enviar broadcast
+broadcastSendBtn?.addEventListener("click", async () => {
+  const title = broadcastTitle.value.trim();
+  const body = broadcastMessage.value.trim();
+
+  if (!title || !body) {
+    showToast("Completá todos los campos", "error");
+    return;
+  }
+
+  const confirmed = await showConfirm(
+    "Confirmar envío",
+    `¿Enviar esta notificación a todos los suscriptores?`
+  );
+
+  if (!confirmed) return;
+
+  broadcastSendBtn.classList.add("loading");
+  broadcastSendBtn.disabled = true;
+
+  try {
+    const uniqueTokens = await getAllUniqueTokens();
+
+    if (uniqueTokens.length === 0) {
+      showToast("No hay suscriptores para enviar", "warning");
+      broadcastOverlay.classList.add("hidden");
+      return;
+    }
+
+    // Enviar notificación usando la Cloud Function
+    const response = await fetch(SEND_NOTIFICATION_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        tokens: uniqueTokens,
+        title: title,
+        body: body,
+        data: { type: "broadcast" }
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      showToast(`Notificación enviada a ${uniqueTokens.length} usuario${uniqueTokens.length !== 1 ? "s" : ""}`, "success");
+      broadcastOverlay.classList.add("hidden");
+    } else {
+      showToast(`Error: ${result.error}`, "error");
+    }
+  } catch (error) {
+    console.error("Error enviando broadcast:", error);
+    showToast("Error al enviar notificación", "error");
+  } finally {
+    broadcastSendBtn.classList.remove("loading");
+    broadcastSendBtn.disabled = false;
+  }
+});
+
+// Función para obtener todos los tokens únicos
+async function getAllUniqueTokens() {
+  try {
+    const courtsSnap = await getDocs(collection(db, "courts"));
+    const tokensSet = new Set();
+
+    for (const courtDoc of courtsSnap.docs) {
+      const subscribersSnap = await getDocs(
+        collection(db, "courts", courtDoc.id, "subscribers")
+      );
+      subscribersSnap.forEach(sub => {
+        const token = sub.data().token;
+        if (token) tokensSet.add(token);
+      });
+    }
+
+    return Array.from(tokensSet);
+  } catch (error) {
+    console.error("Error obteniendo tokens:", error);
+    return [];
+  }
+}
+
 // ---------- SISTEMA DE NOTIFICACIONES ----------
 const notificationsBtn = document.getElementById("notifications-btn");
 const notificationsBadge = document.getElementById("notifications-badge");
