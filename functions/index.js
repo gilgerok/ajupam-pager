@@ -30,16 +30,20 @@ exports.sendNotification = onRequest({ region: "us-central1" }, (req, res) => {
 
       logger.info(`📤 Enviando notificación a ${tokens.length} tokens`);
 
-      const message = {
+      // Enviar notificación a cada token individualmente con su token en data
+      const messages = tokens.map(token => ({
         notification: {
           title: title || "Notificación AJUPAM",
           body: body || "Hay una actualización disponible"
         },
-        data: { courtId: courtId || "" },
-        tokens
-      };
+        data: {
+          courtId: courtId || "",
+          token: token  // ✨ Incluir el token para que el SW pueda guardar la notificación
+        },
+        token
+      }));
 
-      const response = await admin.messaging().sendEachForMulticast(message);
+      const response = await admin.messaging().sendEach(messages);
 
       logger.info("✅ Notificaciones enviadas:", response.successCount);
       logger.info("❌ Fallidas:", response.failureCount);

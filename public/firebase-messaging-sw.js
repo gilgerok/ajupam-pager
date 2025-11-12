@@ -42,8 +42,10 @@ messaging.onBackgroundMessage(async (payload) => {
   };
 
   // 💾 Guardar notificación en Firestore
+  // Nota: En Service Worker no hay acceso a localStorage
+  // El token viene en payload.data.token desde el servidor
   try {
-    const token = localStorage.getItem("fcm_token");
+    const token = payload.data?.token || payload.fcmOptions?.token;
     if (token) {
       await db.collection("notifications").doc(token).collection("messages").add({
         title: notificationTitle,
@@ -59,6 +61,8 @@ messaging.onBackgroundMessage(async (payload) => {
         const unreadCount = await getUnreadCount(token);
         await navigator.setAppBadge(unreadCount);
       }
+    } else {
+      console.warn("⚠️ [SW] No se encontró token en el payload para guardar notificación");
     }
   } catch (error) {
     console.error("❌ [SW] Error guardando notificación:", error);

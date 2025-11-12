@@ -31,7 +31,6 @@ const adminView = document.getElementById("admin-view");
 const courtsList = document.getElementById("courts-list");
 const adminCourtsList = document.getElementById("admin-courts-list");
 
-const adminAccessLink = document.getElementById("admin-access-link");
 const goToUserBtn = document.getElementById("go-to-user");
 const loginForm = document.getElementById("login-form");
 const logoutBtn = document.getElementById("logout-btn");
@@ -417,11 +416,26 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 // ---------- NAVEGACIÓN ----------
-adminAccessLink.addEventListener("click", e => {
-  e.preventDefault();
-  showView(authView);
+// Routing por URL hash
+function handleHashChange() {
+  const hash = window.location.hash;
+  if (hash === "#admin") {
+    showView(authView);
+  } else {
+    showView(userView);
+  }
+}
+
+// Escuchar cambios en el hash
+window.addEventListener("hashchange", handleHashChange);
+
+// Ejecutar al cargar la página
+handleHashChange();
+
+goToUserBtn.addEventListener("click", () => {
+  window.location.hash = "";
+  showView(userView);
 });
-goToUserBtn.addEventListener("click", () => showView(userView));
 
 addCourtBtn.addEventListener("click", async () => {
   const nombre = await showModal(

@@ -88,10 +88,21 @@ body {
 /* Asegurar que los iconos Font Awesome se renderizan correctamente */
 i.fas, i.far, i.fal, i.fad, i.fab {
     font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-    font-style: normal;
-    font-variant: normal;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
+    font-style: normal !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    font-weight: 900 !important;  /* Solid icons weight */
+    display: inline-block !important;
+}
+
+i.far {
+    font-weight: 400 !important;  /* Regular icons weight */
+}
+
+i.fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
 }
 
 /* ============================================
