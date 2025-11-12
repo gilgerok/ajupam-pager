@@ -11,9 +11,21 @@ service cloud.firestore {
     match /courts/{courtId} {
       // Cualquiera puede leer (para ver lista de canchas)
       allow read: if true;
-      
+
       // Solo admins pueden crear, actualizar o eliminar
       allow create, update, delete: if isAdmin();
+
+      // Subcollection de suscriptores
+      match /subscribers/{subscriberId} {
+        // Cualquiera puede leer (para contar suscriptores)
+        allow read: if true;
+
+        // Cualquiera puede crear/eliminar suscripciones
+        allow create, delete: if true;
+
+        // Solo admins pueden actualizar
+        allow update: if isAdmin();
+      }
     }
     
     // Subscriptions collection
