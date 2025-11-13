@@ -1175,31 +1175,91 @@ loadFormLinks();
 // ============================================
 function initMobileNavigation() {
   const navTabs = document.querySelectorAll(".nav-tab");
-  const contentSections = document.querySelectorAll(".content-section");
+  const contentSections = Array.from(document.querySelectorAll(".content-section"));
+  const sectionNames = ["canchas", "cuadros", "encuestas"];
+  let currentSectionIndex = 0;
 
-  navTabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const targetSection = tab.dataset.tab;
+  function switchToSection(targetIndex, direction = "none") {
+    if (targetIndex < 0 || targetIndex >= contentSections.length) return;
 
-      // Remove active class from all tabs
-      navTabs.forEach(t => t.classList.remove("active"));
+    const oldSection = contentSections[currentSectionIndex];
+    const newSection = contentSections[targetIndex];
 
-      // Add active class to clicked tab
-      tab.classList.add("active");
+    // Update nav tabs
+    navTabs.forEach((t, idx) => {
+      t.classList.toggle("active", idx === targetIndex);
+    });
 
-      // Hide all sections
-      contentSections.forEach(section => {
-        if (section.dataset.section === targetSection) {
-          section.classList.remove("hidden");
-        } else {
-          section.classList.add("hidden");
-        }
+    // Apply animations based on direction
+    if (direction === "left") {
+      oldSection.classList.add("slide-out-left");
+      newSection.classList.remove("hidden");
+      newSection.classList.add("slide-in-right");
+    } else if (direction === "right") {
+      oldSection.classList.add("slide-out-right");
+      newSection.classList.remove("hidden");
+      newSection.classList.add("slide-in-left");
+    } else {
+      // No animation, instant switch
+      contentSections.forEach((section, idx) => {
+        section.classList.toggle("hidden", idx !== targetIndex);
       });
+    }
 
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // Clean up animations after transition
+    if (direction !== "none") {
+      setTimeout(() => {
+        oldSection.classList.remove("slide-out-left", "slide-out-right");
+        oldSection.classList.add("hidden");
+        newSection.classList.remove("slide-in-left", "slide-in-right");
+        currentSectionIndex = targetIndex;
+      }, 300);
+    } else {
+      currentSectionIndex = targetIndex;
+    }
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // Tab click handlers
+  navTabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => {
+      const direction = index > currentSectionIndex ? "left" : index < currentSectionIndex ? "right" : "none";
+      switchToSection(index, direction);
     });
   });
+
+  // Swipe gesture support
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const userView = document.querySelector(".user-view");
+
+  if (userView) {
+    userView.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    userView.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+  }
+
+  function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swipe left - go to next section
+        switchToSection(currentSectionIndex + 1, "left");
+      } else {
+        // Swipe right - go to previous section
+        switchToSection(currentSectionIndex - 1, "right");
+      }
+    }
+  }
 }
 
 // Initialize mobile navigation
