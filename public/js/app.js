@@ -33,9 +33,9 @@ const adminCourtsList = document.getElementById("admin-courts-list");
 
 const goToUserBtn = document.getElementById("go-to-user");
 const loginForm = document.getElementById("login-form");
-const logoutBtn = document.getElementById("logout-btn");
 const headerLogoutBtn = document.getElementById("header-logout-btn");
 const addCourtBtn = document.getElementById("add-court-btn");
+const subscribeAllBtn = document.getElementById("subscribe-all-btn");
 const unsubscribeAllBtn = document.getElementById("unsubscribe-all-btn");
 const toastContainer = document.getElementById("toast-container");
 const notificationsBtn = document.getElementById("notifications-btn");
@@ -174,6 +174,22 @@ async function isTokenSubscribed(courtId, token) {
   return subsSnap.docs.some(d => d.data().token === token);
 }
 
+async function getSubscribedCourtsCount(token) {
+  if (!token) return 0;
+  try {
+    const courtsSnap = await getDocs(collection(db, "courts"));
+    let count = 0;
+    for (const courtDoc of courtsSnap.docs) {
+      const isSubscribed = await isTokenSubscribed(courtDoc.id, token);
+      if (isSubscribed) count++;
+    }
+    return count;
+  } catch (err) {
+    console.error("getSubscribedCourtsCount:", err);
+    return 0;
+  }
+}
+
 async function subscribeToCourt(courtId, token) {
   try {
     await addDoc(collection(db, "courts", courtId, "subscribers"), {
@@ -221,17 +237,12 @@ async function renderCourts() {
     for (const docSnap of snap.docs) {
       const data = docSnap.data();
       const id = docSnap.id;
-      const subsCount = await getSubscribersCount(id);
 
       const card = document.createElement("div");
       card.className = "court-card";
       card.innerHTML = `
         <div class="court-header">
           <h3>${data.name}</h3>
-          <div>
-            <span class="court-status ${data.status === "Disponible" ? "status-available" : "status-unavailable"}">${data.status}</span>
-            <span class="court-badge">${subsCount} suscriptores</span>
-          </div>
         </div>
         <div class="court-actions">
           <button class="btn btn-primary btn-subscribe" data-id="${id}">
@@ -243,7 +254,6 @@ async function renderCourts() {
 
       const btn = card.querySelector(".btn-subscribe");
       const btnText = btn.querySelector(".btn-text");
-      const badge = card.querySelector(".court-badge");
 
       const subscribed = token ? await isTokenSubscribed(id, token) : false;
       if (subscribed) {
@@ -272,8 +282,6 @@ async function renderCourts() {
             btn.classList.add("subscribed", "success-animation");
             setTimeout(() => btn.classList.remove("success-animation"), 400);
             btnText.textContent = "Desuscribirme";
-            const newCount = await getSubscribersCount(id);
-            badge.textContent = `${newCount} suscriptores`;
             showToast("Te suscribiste a la cancha", "success");
           }
         } else {
@@ -282,15 +290,24 @@ async function renderCourts() {
           if (ok) {
             btn.classList.remove("subscribed");
             btnText.textContent = "Notificarme";
-            const newCount = await getSubscribersCount(id);
-            badge.textContent = `${newCount} suscriptores`;
             showToast("Te desuscribiste", "info");
           }
         }
       });
     }
 
-    // Mostrar/ocultar botón "Desactivar todas"
+    // Mostrar/ocultar botones "Activar todas" y "Cancelar todas"
+    const totalCourts = snap.size;
+    const subscribedCount = hasSubscriptions ? await getSubscribedCourtsCount(token) : 0;
+
+    // Mostrar "Activar todas" si no está suscrito a todas
+    if (subscribedCount < totalCourts) {
+      subscribeAllBtn.style.display = "inline-flex";
+    } else {
+      subscribeAllBtn.style.display = "none";
+    }
+
+    // Mostrar "Cancelar todas" si tiene al menos una suscripción
     if (hasSubscriptions) {
       unsubscribeAllBtn.style.display = "inline-flex";
     } else {
@@ -403,6 +420,32 @@ async function renderAdminCourts() {
     console.error("renderAdminCourts:", err);
     showToast("Error cargando canchas (admin)", "error");
   }
+
+  // Actualizar estadísticas
+  updateAdminStats();
+}
+
+// Actualizar estadísticas del panel admin
+async function updateAdminStats() {
+  try {
+    const statSubs = document.getElementById("stat-subs");
+    const statCourts = document.getElementById("stat-courts");
+
+    // Total de canchas
+    const courtsSnap = await getDocs(collection(db, "courts"));
+    const totalCourts = courtsSnap.size;
+    statCourts.textContent = totalCourts;
+
+    // Total de suscripciones activas (sumando todas las subcollections)
+    let totalSubs = 0;
+    for (const courtDoc of courtsSnap.docs) {
+      const subsSnap = await getDocs(collection(db, "courts", courtDoc.id, "subscribers"));
+      totalSubs += subsSnap.size;
+    }
+    statSubs.textContent = totalSubs;
+  } catch (err) {
+    console.error("updateAdminStats error:", err);
+  }
 }
 
 // ---------- LOGIN ----------
@@ -421,14 +464,7 @@ loginForm.addEventListener("submit", async e => {
   }
 });
 
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  showToast("Sesión cerrada", "info");
-  showView(userView);
-  renderCourts();
-});
-
-// Logout desde el header (mismo comportamiento)
+// Logout desde el header
 headerLogoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   showToast("Sesión cerrada", "info");
@@ -473,6 +509,48 @@ addCourtBtn.addEventListener("click", async () => {
   showToast("Cancha creada", "success");
   renderAdminCourts();
   renderCourts();
+});
+
+// Activar todas las notificaciones
+subscribeAllBtn.addEventListener("click", async () => {
+  let token = localStorage.getItem("fcm_token");
+
+  if (!token) {
+    token = await getFCMToken();
+    if (!token) {
+      showToast("No se pudo obtener el token de notificaciones", "error");
+      return;
+    }
+    localStorage.setItem("fcm_token", token);
+  }
+
+  subscribeAllBtn.classList.add("loading");
+
+  try {
+    const courtsSnap = await getDocs(collection(db, "courts"));
+    let subscribedCount = 0;
+
+    for (const courtDoc of courtsSnap.docs) {
+      const alreadySubscribed = await isTokenSubscribed(courtDoc.id, token);
+      if (!alreadySubscribed) {
+        const success = await subscribeToCourt(courtDoc.id, token);
+        if (success) subscribedCount++;
+      }
+    }
+
+    subscribeAllBtn.classList.remove("loading");
+
+    if (subscribedCount > 0) {
+      showToast(`Te suscribiste a ${subscribedCount} ${subscribedCount === 1 ? 'cancha' : 'canchas'}`, "success");
+      renderCourts();
+    } else {
+      showToast("Ya estás suscrito a todas las canchas", "info");
+    }
+  } catch (err) {
+    console.error("Error al suscribirse a todas las canchas:", err);
+    subscribeAllBtn.classList.remove("loading");
+    showToast("Error al activar las notificaciones", "error");
+  }
 });
 
 // Desactivar todas las notificaciones

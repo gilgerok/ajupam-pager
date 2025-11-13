@@ -656,12 +656,21 @@ textarea.form-control {
 .welcome-card p {
     font-size: 1.1rem;
     opacity: 0.9;
+    margin-bottom: 1.5rem;
 }
 
-/* Courts List */
+.bulk-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Courts List - Grid Layout */
 .courts-list {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
 .court-card {
@@ -671,6 +680,9 @@ textarea.form-control {
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
     border-left: 4px solid var(--primary-blue);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .court-card:hover {
@@ -685,16 +697,28 @@ textarea.form-control {
 
 .court-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 1rem;
+    text-align: center;
 }
 
 .court-header h3 {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     color: var(--primary-blue);
     margin: 0;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .courts-list {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1rem;
+    }
+
+    .court-header h3 {
+        font-size: 1.3rem;
+    }
 }
 
 .court-status {
