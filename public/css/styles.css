@@ -12,6 +12,8 @@
     --primary-blue-light: #0066CC;
     --primary-blue-dark: #004085;
     --neon-yellow: #FFD700;
+    --tennis-yellow: #CCFF00;
+    --tennis-yellow-dark: #b8e600;
     --dark-gray: #1a1a1a;
     --medium-gray: #555555;
     --light-gray: #F8F9FA;
@@ -670,16 +672,51 @@ textarea.form-control {
     flex-wrap: wrap;
 }
 
+/* Courts Container - Similar to external-links-section */
+.courts-container {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.courts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--light-gray);
+}
+
+.courts-header h3 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.courts-bulk-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
 /* Courts List - Grid Layout */
 .courts-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2rem;
 }
 
 .court-card {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, #0052a3 100%);
+    background: linear-gradient(135deg, var(--tennis-yellow) 0%, var(--tennis-yellow-dark) 100%);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     box-shadow: var(--shadow-sm);
@@ -711,12 +748,31 @@ textarea.form-control {
 .court-header h3 {
     font-family: var(--font-display);
     font-size: 1.5rem;
-    color: var(--white);
+    color: var(--dark-gray);
     margin: 0;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 /* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
+    .courts-container {
+        padding: 1.5rem;
+    }
+
+    .courts-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .courts-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .courts-bulk-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
     .courts-list {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap: 1rem;

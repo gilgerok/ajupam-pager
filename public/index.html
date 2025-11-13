@@ -76,25 +76,31 @@
           <i class="fas fa-bell welcome-icon"></i>
           <h2>¡Recibí Notificaciones!</h2>
           <p>Activá las canchas que te interesan y te avisaremos cuando estén disponibles</p>
-          <div class="bulk-actions">
-            <button id="subscribe-all-btn" class="btn btn-primary" style="display:none;">
-              <i class="fas fa-bell"></i> Activar Todas
-            </button>
-            <button id="unsubscribe-all-btn" class="btn btn-secondary" style="display:none;">
-              <i class="fas fa-bell-slash"></i> Cancelar Todas
-            </button>
-          </div>
-        </div>
-
-        <div id="courts-list" class="courts-list">
-          <div class="loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando canchas...</p>
-          </div>
         </div>
 
         <!-- Banner Canchas -->
         <div class="banner-zone" data-banner-section="canchas"></div>
+
+        <div class="courts-container">
+          <div class="courts-header">
+            <h3><i class="fas fa-basketball-ball"></i> Canchas Disponibles</h3>
+            <div class="courts-bulk-actions">
+              <button id="subscribe-all-btn" class="btn btn-warning btn-icon" style="display:none;" title="Activar Todas">
+                <i class="fas fa-bell"></i>
+              </button>
+              <button id="unsubscribe-all-btn" class="btn btn-secondary btn-icon" style="display:none;" title="Cancelar Todas">
+                <i class="fas fa-bell-slash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="courts-list" class="courts-list">
+            <div class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <p>Cargando canchas...</p>
+            </div>
+          </div>
+        </div>
       </div>
       <!-- Fin Sección: Canchas -->
 
