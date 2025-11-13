@@ -119,27 +119,33 @@
         <h3><i class="fas fa-link"></i> Enlaces Útiles</h3>
 
         <div class="links-category">
-          <h4><i class="fas fa-trophy"></i> Cuadros de Categorías</h4>
+          <h4><i class="fas fa-venus"></i> Femenino</h4>
+          <div class="links-grid">
+            <a href="#" class="link-card link-card-fem" target="_blank" rel="noopener">
+              <i class="fas fa-table"></i>
+              <span>5ta / 6ta</span>
+            </a>
+            <a href="#" class="link-card link-card-fem" target="_blank" rel="noopener">
+              <i class="fas fa-table"></i>
+              <span>7ma / 8va</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="links-category">
+          <h4><i class="fas fa-mars"></i> Masculino</h4>
           <div class="links-grid">
             <a href="#" class="link-card" target="_blank" rel="noopener">
               <i class="fas fa-table"></i>
-              <span>Primera</span>
+              <span>2da / 3ra</span>
             </a>
             <a href="#" class="link-card" target="_blank" rel="noopener">
               <i class="fas fa-table"></i>
-              <span>Segunda</span>
+              <span>4ta / 5ta</span>
             </a>
             <a href="#" class="link-card" target="_blank" rel="noopener">
               <i class="fas fa-table"></i>
-              <span>Tercera</span>
-            </a>
-            <a href="#" class="link-card" target="_blank" rel="noopener">
-              <i class="fas fa-table"></i>
-              <span>Cuarta</span>
-            </a>
-            <a href="#" class="link-card" target="_blank" rel="noopener">
-              <i class="fas fa-table"></i>
-              <span>Quinta</span>
+              <span>6ta o más</span>
             </a>
           </div>
         </div>
@@ -267,26 +273,30 @@
         <div class="config-card">
           <h4><i class="fas fa-link"></i> Enlaces de Cuadros de Categorías</h4>
           <div class="config-form">
+            <h5 style="color: #e91e63; margin-top: 0;"><i class="fas fa-venus"></i> Femenino</h5>
             <div class="form-group">
-              <label>Primera</label>
-              <input type="url" id="link-primera" class="form-input" placeholder="URL Google Sheets">
+              <label>5ta / 6ta</label>
+              <input type="url" id="link-fem-5ta6ta" class="form-input" placeholder="URL Google Sheets">
             </div>
             <div class="form-group">
-              <label>Segunda</label>
-              <input type="url" id="link-segunda" class="form-input" placeholder="URL Google Sheets">
+              <label>7ma / 8va</label>
+              <input type="url" id="link-fem-7ma8va" class="form-input" placeholder="URL Google Sheets">
+            </div>
+
+            <h5 style="color: #0066cc; margin-top: 1.5rem;"><i class="fas fa-mars"></i> Masculino</h5>
+            <div class="form-group">
+              <label>2da / 3ra</label>
+              <input type="url" id="link-masc-2da3ra" class="form-input" placeholder="URL Google Sheets">
             </div>
             <div class="form-group">
-              <label>Tercera</label>
-              <input type="url" id="link-tercera" class="form-input" placeholder="URL Google Sheets">
+              <label>4ta / 5ta</label>
+              <input type="url" id="link-masc-4ta5ta" class="form-input" placeholder="URL Google Sheets">
             </div>
             <div class="form-group">
-              <label>Cuarta</label>
-              <input type="url" id="link-cuarta" class="form-input" placeholder="URL Google Sheets">
+              <label>6ta o más</label>
+              <input type="url" id="link-masc-6tamas" class="form-input" placeholder="URL Google Sheets">
             </div>
-            <div class="form-group">
-              <label>Quinta</label>
-              <input type="url" id="link-quinta" class="form-input" placeholder="URL Google Sheets">
-            </div>
+
             <button class="btn btn-primary" onclick="saveCategoryLinks()">
               <i class="fas fa-save"></i> Guardar Enlaces de Categorías
             </button>

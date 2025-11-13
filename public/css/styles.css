@@ -890,6 +890,10 @@ textarea.form-control {
     font-size: 1rem;
 }
 
+.link-card-fem {
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+}
+
 .link-card-warning {
     background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
 }

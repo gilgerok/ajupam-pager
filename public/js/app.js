@@ -1005,11 +1005,11 @@ window.saveBanner = async function(bannerNum) {
 // Guardar enlaces de categorías
 window.saveCategoryLinks = async function() {
   const links = {
-    primera: document.getElementById("link-primera").value,
-    segunda: document.getElementById("link-segunda").value,
-    tercera: document.getElementById("link-tercera").value,
-    cuarta: document.getElementById("link-cuarta").value,
-    quinta: document.getElementById("link-quinta").value
+    fem5ta6ta: document.getElementById("link-fem-5ta6ta").value,
+    fem7ma8va: document.getElementById("link-fem-7ma8va").value,
+    masc2da3ra: document.getElementById("link-masc-2da3ra").value,
+    masc4ta5ta: document.getElementById("link-masc-4ta5ta").value,
+    masc6tamas: document.getElementById("link-masc-6tamas").value
   };
 
   try {
@@ -1063,11 +1063,11 @@ async function loadAdminConfig() {
     const categoryDoc = await getDoc(doc(db, "config", "categoryLinks"));
     if (categoryDoc.exists()) {
       const data = categoryDoc.data();
-      document.getElementById("link-primera").value = data.primera || "";
-      document.getElementById("link-segunda").value = data.segunda || "";
-      document.getElementById("link-tercera").value = data.tercera || "";
-      document.getElementById("link-cuarta").value = data.cuarta || "";
-      document.getElementById("link-quinta").value = data.quinta || "";
+      document.getElementById("link-fem-5ta6ta").value = data.fem5ta6ta || "";
+      document.getElementById("link-fem-7ma8va").value = data.fem7ma8va || "";
+      document.getElementById("link-masc-2da3ra").value = data.masc2da3ra || "";
+      document.getElementById("link-masc-4ta5ta").value = data.masc4ta5ta || "";
+      document.getElementById("link-masc-6tamas").value = data.masc6tamas || "";
     }
 
     // Cargar enlaces de formularios
@@ -1127,23 +1127,56 @@ async function loadCategoryLinks() {
     const docSnap = await getDoc(doc(db, "config", "categoryLinks"));
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const categories = ["primera", "segunda", "tercera", "cuarta", "quinta"];
-      const linksGrid = document.querySelectorAll(".links-category")[0]?.querySelector(".links-grid");
 
-      if (linksGrid) {
-        linksGrid.innerHTML = "";
-        categories.forEach(cat => {
-          if (data[cat]) {
+      // Categorías femeninas
+      const femCategories = [
+        { key: "fem5ta6ta", label: "5ta / 6ta" },
+        { key: "fem7ma8va", label: "7ma / 8va" }
+      ];
+
+      // Categorías masculinas
+      const mascCategories = [
+        { key: "masc2da3ra", label: "2da / 3ra" },
+        { key: "masc4ta5ta", label: "4ta / 5ta" },
+        { key: "masc6tamas", label: "6ta o más" }
+      ];
+
+      // Renderizar categorías femeninas
+      const femLinksGrid = document.querySelectorAll(".links-category")[0]?.querySelector(".links-grid");
+      if (femLinksGrid) {
+        femLinksGrid.innerHTML = "";
+        femCategories.forEach(cat => {
+          if (data[cat.key]) {
             const linkCard = document.createElement("a");
-            linkCard.href = data[cat];
+            linkCard.href = data[cat.key];
+            linkCard.className = "link-card link-card-fem";
+            linkCard.target = "_blank";
+            linkCard.rel = "noopener";
+            linkCard.innerHTML = `
+              <i class="fas fa-table"></i>
+              <span>${cat.label}</span>
+            `;
+            femLinksGrid.appendChild(linkCard);
+          }
+        });
+      }
+
+      // Renderizar categorías masculinas
+      const mascLinksGrid = document.querySelectorAll(".links-category")[1]?.querySelector(".links-grid");
+      if (mascLinksGrid) {
+        mascLinksGrid.innerHTML = "";
+        mascCategories.forEach(cat => {
+          if (data[cat.key]) {
+            const linkCard = document.createElement("a");
+            linkCard.href = data[cat.key];
             linkCard.className = "link-card";
             linkCard.target = "_blank";
             linkCard.rel = "noopener";
             linkCard.innerHTML = `
               <i class="fas fa-table"></i>
-              <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+              <span>${cat.label}</span>
             `;
-            linksGrid.appendChild(linkCard);
+            mascLinksGrid.appendChild(linkCard);
           }
         });
       }
@@ -1159,7 +1192,7 @@ async function loadFormLinks() {
     const docSnap = await getDoc(doc(db, "config", "formLinks"));
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const linksGrid = document.querySelectorAll(".links-category")[1]?.querySelector(".links-grid");
+      const linksGrid = document.querySelectorAll(".links-category")[2]?.querySelector(".links-grid");
 
       if (linksGrid) {
         linksGrid.innerHTML = "";
