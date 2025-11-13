@@ -120,6 +120,21 @@ i.fab, .fab {
     margin-right: 0;
 }
 
+/* Fix específico para botones del admin */
+.admin-header .btn i,
+.admin-actions .btn i,
+#logout-btn i,
+#broadcast-btn i,
+#add-court-btn i {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+    display: inline-block !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    margin-right: 0.5rem !important;
+}
+
 /* ============================================
    UTILIDADES
    ============================================ */
