@@ -1089,9 +1089,9 @@ async function loadBanners() {
   try {
     const sections = ['canchas', 'cuadros', 'encuestas'];
     const colors = [
-      { gradient: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', icon: 'fa-th', btnClass: 'btn-primary' },
-      { gradient: 'linear-gradient(135deg, #cc6600 0%, #994d00 100%)', icon: 'fa-table', btnClass: 'btn-warning' },
-      { gradient: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', icon: 'fa-file-alt', btnClass: 'btn-success' }
+      { gradient: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', icon: 'fa-arrow-right', btnClass: 'btn-primary' },
+      { gradient: 'linear-gradient(135deg, #cc6600 0%, #994d00 100%)', icon: 'fa-arrow-right', btnClass: 'btn-warning' },
+      { gradient: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', icon: 'fa-arrow-right', btnClass: 'btn-success' }
     ];
 
     for (let i = 0; i < sections.length; i++) {
