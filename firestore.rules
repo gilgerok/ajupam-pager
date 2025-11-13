@@ -59,5 +59,14 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if isAdmin();
     }
+
+    // Config collection - Configuración de enlaces y banners
+    match /config/{configId} {
+      // Cualquiera puede leer la configuración
+      allow read: if true;
+
+      // Solo admins pueden escribir
+      allow write: if isAdmin();
+    }
   }
 }

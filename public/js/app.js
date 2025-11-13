@@ -423,6 +423,9 @@ async function renderAdminCourts() {
 
   // Actualizar estadísticas
   updateAdminStats();
+
+  // Cargar configuración de enlaces y banners
+  loadAdminConfig();
 }
 
 // Actualizar estadísticas del panel admin
@@ -966,3 +969,234 @@ onAuthStateChanged(auth, user => {
     }
   }
 });
+
+// ========================================
+// CONFIGURACIÓN DE ENLACES Y BANNERS
+// ========================================
+
+// Guardar configuración de banner
+window.saveBanner = async function(bannerNum) {
+  const title = document.getElementById(`banner${bannerNum}-title`).value;
+  const desc = document.getElementById(`banner${bannerNum}-desc`).value;
+  const url = document.getElementById(`banner${bannerNum}-url`).value;
+  const image = document.getElementById(`banner${bannerNum}-image`).value;
+
+  if (!title || !url) {
+    showToast("Completá al menos el título y la URL", "warning");
+    return;
+  }
+
+  try {
+    await setDoc(doc(db, "config", `banner${bannerNum}`), {
+      title,
+      description: desc,
+      url,
+      imageUrl: image,
+      updatedAt: serverTimestamp()
+    });
+    showToast(`Banner ${bannerNum} guardado correctamente`, "success");
+    loadBanners(); // Recargar banners en vista de usuario
+  } catch (err) {
+    console.error("Error guardando banner:", err);
+    showToast("Error al guardar el banner", "error");
+  }
+};
+
+// Guardar enlaces de categorías
+window.saveCategoryLinks = async function() {
+  const links = {
+    primera: document.getElementById("link-primera").value,
+    segunda: document.getElementById("link-segunda").value,
+    tercera: document.getElementById("link-tercera").value,
+    cuarta: document.getElementById("link-cuarta").value,
+    quinta: document.getElementById("link-quinta").value
+  };
+
+  try {
+    await setDoc(doc(db, "config", "categoryLinks"), {
+      ...links,
+      updatedAt: serverTimestamp()
+    });
+    showToast("Enlaces de categorías guardados", "success");
+    loadCategoryLinks(); // Recargar enlaces en vista de usuario
+  } catch (err) {
+    console.error("Error guardando enlaces:", err);
+    showToast("Error al guardar enlaces", "error");
+  }
+};
+
+// Guardar enlaces de formularios
+window.saveFormLinks = async function() {
+  const denuncias = document.getElementById("link-denuncias").value;
+  const encuesta = document.getElementById("link-encuesta").value;
+
+  try {
+    await setDoc(doc(db, "config", "formLinks"), {
+      denuncias,
+      encuesta,
+      updatedAt: serverTimestamp()
+    });
+    showToast("Enlaces de formularios guardados", "success");
+    loadFormLinks(); // Recargar enlaces en vista de usuario
+  } catch (err) {
+    console.error("Error guardando formularios:", err);
+    showToast("Error al guardar formularios", "error");
+  }
+};
+
+// Cargar configuración en el admin
+async function loadAdminConfig() {
+  try {
+    // Cargar banners
+    for (let i = 1; i <= 2; i++) {
+      const docSnap = await getDoc(doc(db, "config", `banner${i}`));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById(`banner${i}-title`).value = data.title || "";
+        document.getElementById(`banner${i}-desc`).value = data.description || "";
+        document.getElementById(`banner${i}-url`).value = data.url || "";
+        document.getElementById(`banner${i}-image`).value = data.imageUrl || "";
+      }
+    }
+
+    // Cargar enlaces de categorías
+    const categoryDoc = await getDoc(doc(db, "config", "categoryLinks"));
+    if (categoryDoc.exists()) {
+      const data = categoryDoc.data();
+      document.getElementById("link-primera").value = data.primera || "";
+      document.getElementById("link-segunda").value = data.segunda || "";
+      document.getElementById("link-tercera").value = data.tercera || "";
+      document.getElementById("link-cuarta").value = data.cuarta || "";
+      document.getElementById("link-quinta").value = data.quinta || "";
+    }
+
+    // Cargar enlaces de formularios
+    const formDoc = await getDoc(doc(db, "config", "formLinks"));
+    if (formDoc.exists()) {
+      const data = formDoc.data();
+      document.getElementById("link-denuncias").value = data.denuncias || "";
+      document.getElementById("link-encuesta").value = data.encuesta || "";
+    }
+  } catch (err) {
+    console.error("Error cargando config admin:", err);
+  }
+}
+
+// Cargar banners en vista de usuario
+async function loadBanners() {
+  try {
+    const bannersSection = document.querySelector(".banners-section");
+    if (!bannersSection) return;
+
+    bannersSection.innerHTML = "";
+
+    for (let i = 1; i <= 2; i++) {
+      const docSnap = await getDoc(doc(db, "config", `banner${i}`));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const bannerCard = document.createElement("div");
+        bannerCard.className = "banner-card";
+
+        const backgroundImage = data.imageUrl
+          ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${data.imageUrl}')`
+          : `linear-gradient(135deg, ${i === 1 ? '#0066cc' : '#cc6600'} 0%, ${i === 1 ? '#0052a3' : '#994d00'} 100%)`;
+
+        bannerCard.style.backgroundImage = backgroundImage;
+
+        bannerCard.innerHTML = `
+          <div class="banner-content">
+            <h3>${data.title || 'Sin título'}</h3>
+            <p>${data.description || ''}</p>
+            <a href="${data.url || '#'}" class="btn ${i === 1 ? 'btn-primary' : 'btn-warning'} banner-btn" target="_blank" rel="noopener">
+              <i class="fas ${i === 1 ? 'fa-clipboard-list' : 'fa-envelope'}"></i> ${data.title ? 'Ver más' : 'Enlace'}
+            </a>
+          </div>
+        `;
+
+        bannersSection.appendChild(bannerCard);
+      }
+    }
+  } catch (err) {
+    console.error("Error cargando banners:", err);
+  }
+}
+
+// Cargar enlaces de categorías en vista de usuario
+async function loadCategoryLinks() {
+  try {
+    const docSnap = await getDoc(doc(db, "config", "categoryLinks"));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const categories = ["primera", "segunda", "tercera", "cuarta", "quinta"];
+      const linksGrid = document.querySelectorAll(".links-category")[0]?.querySelector(".links-grid");
+
+      if (linksGrid) {
+        linksGrid.innerHTML = "";
+        categories.forEach(cat => {
+          if (data[cat]) {
+            const linkCard = document.createElement("a");
+            linkCard.href = data[cat];
+            linkCard.className = "link-card";
+            linkCard.target = "_blank";
+            linkCard.rel = "noopener";
+            linkCard.innerHTML = `
+              <i class="fas fa-table"></i>
+              <span>${cat.charAt(0).toUpperCase() + cat.slice(1)}</span>
+            `;
+            linksGrid.appendChild(linkCard);
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Error cargando enlaces de categorías:", err);
+  }
+}
+
+// Cargar enlaces de formularios en vista de usuario
+async function loadFormLinks() {
+  try {
+    const docSnap = await getDoc(doc(db, "config", "formLinks"));
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const linksGrid = document.querySelectorAll(".links-category")[1]?.querySelector(".links-grid");
+
+      if (linksGrid) {
+        linksGrid.innerHTML = "";
+
+        if (data.denuncias) {
+          const denunciasCard = document.createElement("a");
+          denunciasCard.href = data.denuncias;
+          denunciasCard.className = "link-card link-card-warning";
+          denunciasCard.target = "_blank";
+          denunciasCard.rel = "noopener";
+          denunciasCard.innerHTML = `
+            <i class="fas fa-user-secret"></i>
+            <span>Denuncias Anónimas</span>
+          `;
+          linksGrid.appendChild(denunciasCard);
+        }
+
+        if (data.encuesta) {
+          const encuestaCard = document.createElement("a");
+          encuestaCard.href = data.encuesta;
+          encuestaCard.className = "link-card link-card-success";
+          encuestaCard.target = "_blank";
+          encuestaCard.rel = "noopener";
+          encuestaCard.innerHTML = `
+            <i class="fas fa-star"></i>
+            <span>Encuesta de Satisfacción</span>
+          `;
+          linksGrid.appendChild(encuestaCard);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error cargando enlaces de formularios:", err);
+  }
+}
+
+// Cargar todo al inicio
+loadBanners();
+loadCategoryLinks();
+loadFormLinks();
