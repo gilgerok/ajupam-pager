@@ -324,13 +324,15 @@ async function renderCourts() {
 // ---------- RENDER ADMIN ----------
 async function renderAdminCourts() {
   try {
-    adminCourtsList.innerHTML = `<div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando canchas...</p></div>`;
+    const tbody = document.getElementById("admin-courts-tbody");
+    tbody.innerHTML = `<tr><td colspan="5" class="loading-cell"><div class="loading"><i class="fas fa-spinner fa-spin"></i><p>Cargando canchas...</p></div></td></tr>`;
+
     const q = query(collection(db, "courts"), orderBy("createdAt", "asc"));
     const snap = await getDocs(q);
-    adminCourtsList.innerHTML = "";
+    tbody.innerHTML = "";
 
     if (snap.empty) {
-      adminCourtsList.innerHTML = `<p class="empty-state">No hay canchas registradas.</p>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem;">No hay canchas registradas.</td></tr>`;
       return;
     }
 
@@ -338,27 +340,48 @@ async function renderAdminCourts() {
       const data = docSnap.data();
       const id = docSnap.id;
       const subsCount = await getSubscribersCount(id);
+      const status = data.status || "Disponible";
+      const statusClass = status.toLowerCase() === "disponible" ? "available" : "unavailable";
 
-      const card = document.createElement("div");
-      card.className = "admin-court-card";
-      card.innerHTML = `
-        <div class="admin-court-header">
-          <h4>${data.name}</h4>
-          <div class="admin-court-actions">
-            <button class="btn btn-primary btn-edit" data-id="${id}"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-secondary btn-notify" data-id="${id}"><i class="fas fa-paper-plane"></i></button>
-            <button class="btn btn-danger btn-delete" data-id="${id}"><i class="fas fa-trash"></i></button>
+      const row = document.createElement("tr");
+      row.dataset.courtId = id;
+      row.innerHTML = `
+        <td>
+          <input type="checkbox" class="court-checkbox" data-court-id="${id}" data-court-name="${data.name}">
+        </td>
+        <td>
+          <span class="court-name">${data.name}</span>
+        </td>
+        <td>
+          <span class="subscribers-count">
+            <i class="fas fa-users"></i> ${subsCount}
+          </span>
+        </td>
+        <td>
+          <span class="status-badge ${statusClass}">${status}</span>
+        </td>
+        <td>
+          <div class="table-actions">
+            <button class="btn btn-primary btn-edit" data-id="${id}" title="Editar">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn btn-secondary btn-notify" data-id="${id}" title="Notificar">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+            <button class="btn btn-danger btn-delete" data-id="${id}" title="Eliminar">
+              <i class="fas fa-trash"></i>
+            </button>
           </div>
-        </div>
-        <div class="admin-court-stats">
-          <span>${subsCount} suscriptores</span> ·
-          <span>${data.status || "Disponible"}</span>
-        </div>
+        </td>
       `;
-      adminCourtsList.appendChild(card);
+      tbody.appendChild(row);
 
-      // editar
-      card.querySelector(".btn-edit").addEventListener("click", async () => {
+      // Eventos de checkbox
+      const checkbox = row.querySelector(".court-checkbox");
+      checkbox.addEventListener("change", updateBroadcastButtonState);
+
+      // Editar
+      row.querySelector(".btn-edit").addEventListener("click", async () => {
         const nuevo = await showModal(
           "Editar cancha",
           "Ingresá el nuevo nombre para la cancha:",
@@ -371,8 +394,8 @@ async function renderAdminCourts() {
         }
       });
 
-      // eliminar
-      card.querySelector(".btn-delete").addEventListener("click", async () => {
+      // Eliminar
+      row.querySelector(".btn-delete").addEventListener("click", async () => {
         const confirmed = await showConfirm(
           "Eliminar cancha",
           `¿Estás seguro de eliminar "${data.name}"? Esta acción no se puede deshacer.`
@@ -383,15 +406,15 @@ async function renderAdminCourts() {
         renderAdminCourts();
       });
 
-      // notificar
-      card.querySelector(".btn-notify").addEventListener("click", async () => {
+      // Notificar (individual)
+      row.querySelector(".btn-notify").addEventListener("click", async () => {
         const msg = await showModal(
           "Enviar notificación",
           `Enviá una notificación a los suscriptores de "${data.name}":`,
           "Ingresá el mensaje (opcional)"
         );
 
-        if (msg === null) return; // Usuario canceló
+        if (msg === null) return;
 
         const subsSnap = await getDocs(collection(db, "courts", id, "subscribers"));
         const tokens = subsSnap.docs.map(d => d.data().token).filter(Boolean);
@@ -418,6 +441,9 @@ async function renderAdminCourts() {
         else showToast("Error enviando notificación", "error");
       });
     }
+
+    // Actualizar el estado inicial del botón broadcast
+    updateBroadcastButtonState();
   } catch (err) {
     console.error("renderAdminCourts:", err);
     showToast("Error cargando canchas (admin)", "error");
@@ -1322,3 +1348,133 @@ function initAdminNavigation() {
 
 // Initialize admin navigation
 initAdminNavigation();
+
+// ============================================
+// ADMIN COURTS SELECTION & BROADCAST
+// ============================================
+
+// Actualizar estado del botón broadcast según checkboxes seleccionados
+function updateBroadcastButtonState() {
+  const checkedBoxes = document.querySelectorAll(".court-checkbox:checked");
+  const broadcastBtn = document.getElementById("broadcast-btn");
+  const selectAllCheckbox = document.getElementById("select-all-checkbox");
+  const allCheckboxes = document.querySelectorAll(".court-checkbox");
+
+  if (broadcastBtn) {
+    if (checkedBoxes.length > 0) {
+      broadcastBtn.disabled = false;
+      broadcastBtn.title = `Notificar a ${checkedBoxes.length} ${checkedBoxes.length === 1 ? 'cancha' : 'canchas'} seleccionadas`;
+    } else {
+      broadcastBtn.disabled = true;
+      broadcastBtn.title = "Seleccioná canchas para notificar";
+    }
+  }
+
+  // Actualizar estado del checkbox "Seleccionar todas"
+  if (selectAllCheckbox && allCheckboxes.length > 0) {
+    selectAllCheckbox.checked = checkedBoxes.length === allCheckboxes.length;
+    selectAllCheckbox.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allCheckboxes.length;
+  }
+}
+
+// Checkbox "Seleccionar todas"
+const selectAllCheckbox = document.getElementById("select-all-checkbox");
+if (selectAllCheckbox) {
+  selectAllCheckbox.addEventListener("change", (e) => {
+    const checked = e.target.checked;
+    const courtCheckboxes = document.querySelectorAll(".court-checkbox");
+    courtCheckboxes.forEach(cb => {
+      cb.checked = checked;
+    });
+    updateBroadcastButtonState();
+  });
+}
+
+// Botón "Seleccionar todas" (alternativo)
+const selectAllBtn = document.getElementById("select-all-courts-btn");
+if (selectAllBtn) {
+  selectAllBtn.addEventListener("click", () => {
+    const allCheckboxes = document.querySelectorAll(".court-checkbox");
+    const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+
+    allCheckboxes.forEach(cb => {
+      cb.checked = !allChecked;
+    });
+
+    updateBroadcastButtonState();
+  });
+}
+
+// Broadcast a canchas seleccionadas
+const broadcastBtn = document.getElementById("broadcast-btn");
+if (broadcastBtn) {
+  broadcastBtn.addEventListener("click", async () => {
+    const checkedBoxes = document.querySelectorAll(".court-checkbox:checked");
+
+    if (checkedBoxes.length === 0) {
+      showToast("Seleccioná al menos una cancha", "warning");
+      return;
+    }
+
+    const courtNames = Array.from(checkedBoxes).map(cb => cb.dataset.courtName).join(", ");
+    const msg = await showModal(
+      `Notificación Broadcast (${checkedBoxes.length} ${checkedBoxes.length === 1 ? 'cancha' : 'canchas'})`,
+      `Enviá una notificación a los suscriptores de: ${courtNames}`,
+      "Ingresá el mensaje"
+    );
+
+    if (msg === null) return;
+
+    broadcastBtn.classList.add("loading");
+
+    try {
+      // Recolectar tokens de todas las canchas seleccionadas
+      const allTokens = new Set();
+
+      for (const checkbox of checkedBoxes) {
+        const courtId = checkbox.dataset.courtId;
+        const subsSnap = await getDocs(collection(db, "courts", courtId, "subscribers"));
+        subsSnap.docs.forEach(d => {
+          const token = d.data().token;
+          if (token) allTokens.add(token);
+        });
+      }
+
+      const tokens = Array.from(allTokens);
+
+      if (tokens.length === 0) {
+        showToast("No hay suscriptores en las canchas seleccionadas", "warning");
+        broadcastBtn.classList.remove("loading");
+        return;
+      }
+
+      const payload = {
+        courtId: "",
+        title: "AJUPAM - Notificación Importante",
+        body: msg || "Hay novedades importantes",
+        tokens
+      };
+
+      const res = await fetch(SEND_NOTIFICATION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      broadcastBtn.classList.remove("loading");
+
+      if (res.ok) {
+        showToast(`Notificación enviada a ${tokens.length} ${tokens.length === 1 ? 'suscriptor' : 'suscriptores'}`, "success");
+        // Desmarcar checkboxes
+        checkedBoxes.forEach(cb => cb.checked = false);
+        updateBroadcastButtonState();
+      } else {
+        showToast("Error enviando notificación", "error");
+      }
+    } catch (err) {
+      console.error("Error en broadcast:", err);
+      showToast("Error enviando notificación", "error");
+      broadcastBtn.classList.remove("loading");
+    }
+  });
+}

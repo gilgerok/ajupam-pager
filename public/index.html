@@ -206,7 +206,10 @@
         <div class="section-header">
           <h3>Gestión de Canchas</h3>
           <div class="admin-actions">
-            <button id="broadcast-btn" class="btn btn-warning btn-icon" title="Notificación Broadcast">
+            <button id="select-all-courts-btn" class="btn btn-secondary btn-icon" title="Seleccionar Todas">
+              <i class="fas fa-check-double"></i>
+            </button>
+            <button id="broadcast-btn" class="btn btn-warning btn-icon" title="Notificación a Seleccionadas" disabled>
               <i class="fas fa-bullhorn"></i>
             </button>
             <button id="add-court-btn" class="btn btn-primary btn-icon" title="Agregar Cancha">
@@ -215,11 +218,30 @@
           </div>
         </div>
 
-        <div id="admin-courts-list" class="admin-courts-list">
-          <div class="loading">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Cargando canchas...</p>
-          </div>
+        <div class="table-responsive">
+          <table id="admin-courts-table" class="courts-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">
+                  <input type="checkbox" id="select-all-checkbox" title="Seleccionar todas">
+                </th>
+                <th>Cancha</th>
+                <th style="width: 120px;">Suscriptores</th>
+                <th style="width: 120px;">Estado</th>
+                <th style="width: 200px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-courts-tbody">
+              <tr>
+                <td colspan="5" class="loading-cell">
+                  <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Cargando canchas...</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
