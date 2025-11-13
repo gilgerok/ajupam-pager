@@ -552,15 +552,15 @@ textarea.form-control {
 }
 
 /* ============================================
-   LOADING
+   LOADING (for loading screens, not buttons)
    ============================================ */
-.loading {
+div.loading {
     text-align: center;
     padding: 3rem;
     color: var(--medium-gray);
 }
 
-.loading i {
+div.loading i {
     font-size: 3rem;
     color: var(--primary-blue);
     margin-bottom: 1rem;
@@ -1917,6 +1917,9 @@ textarea.form-control {
     position: relative;
     pointer-events: none;
     overflow: hidden;
+    /* Reset any inherited loading styles */
+    text-align: inherit !important;
+    padding: inherit !important;
 }
 
 /* Icon-only buttons maintain fixed size */
