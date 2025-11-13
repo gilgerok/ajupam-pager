@@ -451,8 +451,7 @@ function handleHashChange() {
 // Escuchar cambios en el hash
 window.addEventListener("hashchange", handleHashChange);
 
-// Ejecutar al cargar la página
-handleHashChange();
+// NO ejecutar handleHashChange al inicio porque onAuthStateChanged lo hará
 
 goToUserBtn.addEventListener("click", () => {
   window.location.hash = "";
@@ -868,10 +867,24 @@ notificationsBtn?.addEventListener("click", async () => {
 // ---------- OBSERVADOR DE SESIÓN ----------
 onAuthStateChanged(auth, user => {
   if (user) {
-    showView(adminView);
-    renderAdminCourts();
+    // Si hay usuario autenticado, mostrar admin (respetando el hash si es #admin)
+    const hash = window.location.hash;
+    if (hash === "#admin") {
+      showView(adminView);
+      renderAdminCourts();
+    } else {
+      // Usuario logueado pero no en #admin, redirigir a admin
+      window.location.hash = "#admin";
+      showView(adminView);
+      renderAdminCourts();
+    }
   } else {
-    showView(userView);
-    renderCourts();
+    // Sin usuario, mostrar vista de usuario (ignorar #admin si lo hay)
+    if (window.location.hash === "#admin") {
+      showView(authView); // Mostrar login
+    } else {
+      showView(userView);
+      renderCourts();
+    }
   }
 });
