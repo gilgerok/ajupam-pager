@@ -1,6 +1,6 @@
 // firebase-config.js — Playoffs Liga Ajupam (producción)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { getFirestore, getDoc, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-messaging.js";
 
@@ -105,4 +105,4 @@ onMessage(messaging, async (payload) => {
   }
 });
 
-export { db, auth, messaging, VAPID_KEY };
+export { db, auth, messaging, VAPID_KEY, getDoc, setDoc, doc };
