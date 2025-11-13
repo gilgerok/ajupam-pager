@@ -1920,18 +1920,26 @@ div.loading i {
     /* Reset any inherited loading styles */
     text-align: inherit !important;
     padding: inherit !important;
+    /* Maintain button size during loading */
+    min-width: fit-content;
+    width: auto;
+    white-space: nowrap;
 }
 
 /* Icon-only buttons maintain fixed size */
 .btn-icon.loading,
 .btn-icon-small.loading {
-    width: 44px;
-    height: 44px;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
 }
 
 .btn.loading > * {
     /* Keep content visible during loading */
     opacity: 0.6;
+    /* Prevent text from collapsing */
+    display: inline-block;
+    visibility: visible;
 }
 
 /* Rotating border effect at bottom */
