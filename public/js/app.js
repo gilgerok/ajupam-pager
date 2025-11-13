@@ -1050,7 +1050,7 @@ window.saveFormLinks = async function() {
 async function loadAdminConfig() {
   try {
     // Cargar banners
-    for (let i = 1; i <= 2; i++) {
+    for (let i = 1; i <= 3; i++) {
       const docSnap = await getDoc(doc(db, "config", `banner${i}`));
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -1084,7 +1084,7 @@ async function loadAdminConfig() {
   }
 }
 
-// Cargar banners en vista de usuario
+// Cargar banners en vista de usuario (con distribución aleatoria)
 async function loadBanners() {
   try {
     const bannersSection = document.querySelector(".banners-section");
@@ -1092,32 +1092,55 @@ async function loadBanners() {
 
     bannersSection.innerHTML = "";
 
-    for (let i = 1; i <= 2; i++) {
+    // Cargar todos los banners configurados
+    const banners = [];
+    const colors = [
+      { gradient: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', icon: 'fa-clipboard-list', btnClass: 'btn-primary' },
+      { gradient: 'linear-gradient(135deg, #cc6600 0%, #994d00 100%)', icon: 'fa-envelope', btnClass: 'btn-warning' },
+      { gradient: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', icon: 'fa-star', btnClass: 'btn-success' }
+    ];
+
+    for (let i = 1; i <= 3; i++) {
       const docSnap = await getDoc(doc(db, "config", `banner${i}`));
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const bannerCard = document.createElement("div");
-        bannerCard.className = "banner-card";
-
-        const backgroundImage = data.imageUrl
-          ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${data.imageUrl}')`
-          : `linear-gradient(135deg, ${i === 1 ? '#0066cc' : '#cc6600'} 0%, ${i === 1 ? '#0052a3' : '#994d00'} 100%)`;
-
-        bannerCard.style.backgroundImage = backgroundImage;
-
-        bannerCard.innerHTML = `
-          <div class="banner-content">
-            <h3>${data.title || 'Sin título'}</h3>
-            <p>${data.description || ''}</p>
-            <a href="${data.url || '#'}" class="btn ${i === 1 ? 'btn-primary' : 'btn-warning'} banner-btn" target="_blank" rel="noopener">
-              <i class="fas ${i === 1 ? 'fa-clipboard-list' : 'fa-envelope'}"></i> ${data.title ? 'Ver más' : 'Enlace'}
-            </a>
-          </div>
-        `;
-
-        bannersSection.appendChild(bannerCard);
+        if (data.title && data.url) {
+          banners.push({ data, index: i });
+        }
       }
     }
+
+    // Mezclar banners aleatoriamente (Fisher-Yates shuffle)
+    for (let i = banners.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [banners[i], banners[j]] = [banners[j], banners[i]];
+    }
+
+    // Renderizar banners en orden aleatorio
+    banners.forEach((banner, idx) => {
+      const { data, index } = banner;
+      const bannerCard = document.createElement("div");
+      bannerCard.className = "banner-card";
+
+      const color = colors[idx % colors.length];
+      const backgroundImage = data.imageUrl
+        ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${data.imageUrl}')`
+        : color.gradient;
+
+      bannerCard.style.backgroundImage = backgroundImage;
+
+      bannerCard.innerHTML = `
+        <div class="banner-content">
+          <h3>${data.title || 'Sin título'}</h3>
+          <p>${data.description || ''}</p>
+          <a href="${data.url || '#'}" class="btn ${color.btnClass} banner-btn" target="_blank" rel="noopener">
+            <i class="fas ${color.icon}"></i> ${data.title ? 'Ver más' : 'Enlace'}
+          </a>
+        </div>
+      `;
+
+      bannersSection.appendChild(bannerCard);
+    });
   } catch (err) {
     console.error("Error cargando banners:", err);
   }
@@ -1235,3 +1258,38 @@ async function loadFormLinks() {
 loadBanners();
 loadCategoryLinks();
 loadFormLinks();
+
+// ============================================
+// MOBILE BOTTOM NAVIGATION
+// ============================================
+function initMobileNavigation() {
+  const navTabs = document.querySelectorAll(".nav-tab");
+  const contentSections = document.querySelectorAll(".content-section");
+
+  navTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const targetSection = tab.dataset.tab;
+
+      // Remove active class from all tabs
+      navTabs.forEach(t => t.classList.remove("active"));
+
+      // Add active class to clicked tab
+      tab.classList.add("active");
+
+      // Hide all sections
+      contentSections.forEach(section => {
+        if (section.dataset.section === targetSection) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+      });
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}
+
+// Initialize mobile navigation
+initMobileNavigation();

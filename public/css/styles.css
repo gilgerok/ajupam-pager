@@ -419,6 +419,10 @@ i.fab, .fab {
     font-size: 1.125rem;
 }
 
+.btn-icon i {
+    margin-right: 0 !important;
+}
+
 .btn-icon-small {
     width: 36px;
     height: 36px;
@@ -2097,4 +2101,88 @@ textarea.form-control {
         height: 40px;
         font-size: 1.1rem;
     }
+}
+
+/* ============================================
+   MOBILE BOTTOM NAVIGATION
+   ============================================ */
+.content-section {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.content-section.hidden {
+    display: none;
+}
+
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--gray-200);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 0.5rem;
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
+}
+
+.mobile-bottom-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+}
+
+.nav-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border-radius: var(--radius-md);
+    gap: 0.25rem;
+}
+
+.nav-tab i {
+    font-size: 1.25rem;
+    margin-bottom: 0.125rem;
+}
+
+.nav-tab.active {
+    color: var(--primary-blue);
+    background: rgba(0, 102, 204, 0.1);
+}
+
+.nav-tab:hover {
+    background: var(--gray-100);
+}
+
+.nav-tab.active:hover {
+    background: rgba(0, 102, 204, 0.15);
+}
+
+/* Show mobile nav only on mobile devices */
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: grid;
+    }
+
+    /* Add padding to user-view to account for bottom nav */
+    .user-view {
+        padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+/* Hide mobile nav in admin view */
+#admin-view .mobile-bottom-nav {
+    display: none;
 }
