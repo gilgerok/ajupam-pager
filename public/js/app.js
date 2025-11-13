@@ -1281,21 +1281,6 @@ if (selectAllCheckbox) {
   });
 }
 
-// Botón "Seleccionar todas" (alternativo)
-const selectAllBtn = document.getElementById("select-all-courts-btn");
-if (selectAllBtn) {
-  selectAllBtn.addEventListener("click", () => {
-    const allCheckboxes = document.querySelectorAll(".court-checkbox");
-    const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
-
-    allCheckboxes.forEach(cb => {
-      cb.checked = !allChecked;
-    });
-
-    updateBroadcastButtonState();
-  });
-}
-
 // Broadcast a canchas seleccionadas
 const broadcastBtn = document.getElementById("broadcast-btn");
 if (broadcastBtn) {
