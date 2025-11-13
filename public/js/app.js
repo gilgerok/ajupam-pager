@@ -1084,63 +1084,57 @@ async function loadAdminConfig() {
   }
 }
 
-// Cargar banners en vista de usuario (con distribución aleatoria)
+// Cargar banners en vista de usuario (uno por sección)
 async function loadBanners() {
   try {
-    const bannersSection = document.querySelector(".banners-section");
-    if (!bannersSection) return;
-
-    bannersSection.innerHTML = "";
-
-    // Cargar todos los banners configurados
-    const banners = [];
+    const sections = ['canchas', 'cuadros', 'encuestas'];
     const colors = [
-      { gradient: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', icon: 'fa-clipboard-list', btnClass: 'btn-primary' },
-      { gradient: 'linear-gradient(135deg, #cc6600 0%, #994d00 100%)', icon: 'fa-envelope', btnClass: 'btn-warning' },
-      { gradient: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', icon: 'fa-star', btnClass: 'btn-success' }
+      { gradient: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', icon: 'fa-th', btnClass: 'btn-primary' },
+      { gradient: 'linear-gradient(135deg, #cc6600 0%, #994d00 100%)', icon: 'fa-table', btnClass: 'btn-warning' },
+      { gradient: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', icon: 'fa-file-alt', btnClass: 'btn-success' }
     ];
 
-    for (let i = 1; i <= 3; i++) {
-      const docSnap = await getDoc(doc(db, "config", `banner${i}`));
+    for (let i = 0; i < sections.length; i++) {
+      const sectionName = sections[i];
+      const bannerZone = document.querySelector(`.banner-zone[data-banner-section="${sectionName}"]`);
+
+      if (!bannerZone) continue;
+
+      bannerZone.innerHTML = "";
+
+      // Cargar banner correspondiente (banner1 = canchas, banner2 = cuadros, banner3 = encuestas)
+      const docSnap = await getDoc(doc(db, "config", `banner${i + 1}`));
+
       if (docSnap.exists()) {
         const data = docSnap.data();
+
         if (data.title && data.url) {
-          banners.push({ data, index: i });
+          const bannerCard = document.createElement("div");
+          bannerCard.className = "banner-card";
+
+          const color = colors[i];
+          const backgroundImage = data.imageUrl
+            ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${data.imageUrl}')`
+            : color.gradient;
+
+          bannerCard.style.backgroundImage = backgroundImage;
+
+          // Usar 'description' como texto del botón
+          const buttonText = data.description || 'Ver más';
+
+          bannerCard.innerHTML = `
+            <div class="banner-content">
+              <h3>${data.title}</h3>
+              <a href="${data.url}" class="btn ${color.btnClass} banner-btn" target="_blank" rel="noopener">
+                <i class="fas ${color.icon}"></i> ${buttonText}
+              </a>
+            </div>
+          `;
+
+          bannerZone.appendChild(bannerCard);
         }
       }
     }
-
-    // Mezclar banners aleatoriamente (Fisher-Yates shuffle)
-    for (let i = banners.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [banners[i], banners[j]] = [banners[j], banners[i]];
-    }
-
-    // Renderizar banners en orden aleatorio
-    banners.forEach((banner, idx) => {
-      const { data, index } = banner;
-      const bannerCard = document.createElement("div");
-      bannerCard.className = "banner-card";
-
-      const color = colors[idx % colors.length];
-      const backgroundImage = data.imageUrl
-        ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${data.imageUrl}')`
-        : color.gradient;
-
-      bannerCard.style.backgroundImage = backgroundImage;
-
-      bannerCard.innerHTML = `
-        <div class="banner-content">
-          <h3>${data.title || 'Sin título'}</h3>
-          <p>${data.description || ''}</p>
-          <a href="${data.url || '#'}" class="btn ${color.btnClass} banner-btn" target="_blank" rel="noopener">
-            <i class="fas ${color.icon}"></i> ${data.title ? 'Ver más' : 'Enlace'}
-          </a>
-        </div>
-      `;
-
-      bannersSection.appendChild(bannerCard);
-    });
   } catch (err) {
     console.error("Error cargando banners:", err);
   }
@@ -1293,3 +1287,38 @@ function initMobileNavigation() {
 
 // Initialize mobile navigation
 initMobileNavigation();
+
+// ============================================
+// ADMIN NAVIGATION
+// ============================================
+function initAdminNavigation() {
+  const adminNavTabs = document.querySelectorAll(".admin-nav-tab");
+  const adminContentSections = document.querySelectorAll(".admin-content-section");
+
+  adminNavTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      const targetSection = tab.dataset.adminTab;
+
+      // Remove active class from all tabs
+      adminNavTabs.forEach(t => t.classList.remove("active"));
+
+      // Add active class to clicked tab
+      tab.classList.add("active");
+
+      // Hide all sections
+      adminContentSections.forEach(section => {
+        if (section.dataset.adminSection === targetSection) {
+          section.classList.remove("hidden");
+        } else {
+          section.classList.add("hidden");
+        }
+      });
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}
+
+// Initialize admin navigation
+initAdminNavigation();

@@ -93,35 +93,24 @@
           </div>
         </div>
 
-        <!-- Banners Publicitarios -->
-        <div class="banners-section">
-        <div class="banner-card" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1200x400/0066cc/ffffff?text=Banner+1');">
-          <div class="banner-content">
-            <h3>¡Inscribite en nuestros torneos!</h3>
-            <p>Completá el formulario y participá de los próximos eventos</p>
-            <a href="#" class="btn btn-primary banner-btn" target="_blank" rel="noopener">
-              <i class="fas fa-clipboard-list"></i> Inscribirme Ahora
-            </a>
-          </div>
-        </div>
-
-        <div class="banner-card" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1200x400/cc6600/ffffff?text=Banner+2');">
-          <div class="banner-content">
-            <h3>¿Necesitás contactarnos?</h3>
-            <p>Envianos tus consultas o sugerencias</p>
-            <a href="#" class="btn btn-warning banner-btn" target="_blank" rel="noopener">
-              <i class="fas fa-envelope"></i> Contactar
-            </a>
-          </div>
-        </div>
-      </div>
+        <!-- Banner Canchas -->
+        <div class="banner-zone" data-banner-section="canchas"></div>
       </div>
       <!-- Fin Sección: Canchas -->
 
       <!-- Sección: Cuadros -->
       <div class="content-section hidden" data-section="cuadros">
+        <div class="welcome-card">
+          <i class="fas fa-table welcome-icon"></i>
+          <h2>Cuadros de Playoffs</h2>
+          <p>Consultá los cuadros de todas las categorías actualizados en tiempo real</p>
+        </div>
+
+        <!-- Banner Cuadros -->
+        <div class="banner-zone" data-banner-section="cuadros"></div>
+
         <div class="external-links-section">
-          <h3><i class="fas fa-link"></i> Cuadros de Categorías</h3>
+          <h3><i class="fas fa-link"></i> Categorías</h3>
 
           <div class="links-category">
             <h4><i class="fas fa-venus"></i> Femenino</h4>
@@ -160,8 +149,17 @@
 
       <!-- Sección: Encuestas -->
       <div class="content-section hidden" data-section="encuestas">
+        <div class="welcome-card">
+          <i class="fas fa-file-alt welcome-icon"></i>
+          <h2>Formularios y Encuestas</h2>
+          <p>Tu opinión es importante. Completá nuestros formularios y ayudanos a mejorar</p>
+        </div>
+
+        <!-- Banner Encuestas -->
+        <div class="banner-zone" data-banner-section="encuestas"></div>
+
         <div class="external-links-section">
-          <h3><i class="fas fa-file-alt"></i> Formularios y Encuestas</h3>
+          <h3><i class="fas fa-link"></i> Enlaces Disponibles</h3>
 
           <div class="links-category">
             <div class="links-grid">
@@ -202,7 +200,9 @@
         <h2>Panel de Administración</h2>
       </div>
 
-      <div class="admin-courts-section">
+      <!-- Admin Content Sections -->
+      <div class="admin-content-section" data-admin-section="canchas">
+        <div class="admin-courts-section">
         <div class="section-header">
           <h3>Gestión de Canchas</h3>
           <div class="admin-actions">
@@ -244,25 +244,52 @@
         </div>
       </div>
 
-      <!-- Configuración de Enlaces y Banners -->
-      <div class="config-section">
-        <h3><i class="fas fa-cog"></i> Configuración de Enlaces y Banners</h3>
+      <!-- Estadísticas -->
+      <div class="stats-section">
+        <h3>Estadísticas Generales</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="fas fa-bell"></i>
+            <div class="stat-info">
+              <h4>Suscripciones Activas</h4>
+              <p id="stat-subs">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-database"></i>
+            <div class="stat-info">
+              <h4>Total Canchas</h4>
+              <p id="stat-courts">--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+      <!-- Fin Sección Admin: Canchas -->
 
-        <!-- Banners Config -->
-        <div class="config-card">
-          <h4><i class="fas fa-image"></i> Banner 1</h4>
+      <!-- Sección Admin: Banners -->
+      <div class="admin-content-section hidden" data-admin-section="banners">
+        <div class="config-section">
+          <h3><i class="fas fa-image"></i> Configuración de Banners</h3>
+          <p style="color: var(--gray-600); margin-bottom: 2rem;">
+            Cada banner se mostrará en una sección diferente de la vista de usuario (Canchas, Cuadros, Encuestas).
+          </p>
+
+          <!-- Banner Canchas -->
+          <div class="config-card">
+            <h4><i class="fas fa-th"></i> Banner: Canchas</h4>
           <div class="config-form">
             <div class="form-group">
-              <label>Título</label>
-              <input type="text" id="banner1-title" class="form-input" placeholder="¡Inscribite en nuestros torneos!">
+              <label>Título del Banner</label>
+              <input type="text" id="banner1-title" class="form-input" placeholder="Título principal del banner">
             </div>
             <div class="form-group">
-              <label>Descripción</label>
-              <input type="text" id="banner1-desc" class="form-input" placeholder="Completá el formulario y participá...">
+              <label>Texto del Botón</label>
+              <input type="text" id="banner1-desc" class="form-input" placeholder="Ver más">
             </div>
             <div class="form-group">
               <label>URL de destino</label>
-              <input type="url" id="banner1-url" class="form-input" placeholder="https://forms.google.com/...">
+              <input type="url" id="banner1-url" class="form-input" placeholder="https://...">
             </div>
             <div class="form-group">
               <label>URL de imagen de fondo</label>
@@ -272,25 +299,26 @@
               </small>
             </div>
             <button class="btn btn-primary" onclick="saveBanner(1)">
-              <i class="fas fa-save"></i> Guardar Banner 1
+              <i class="fas fa-save"></i> Guardar Banner
             </button>
           </div>
         </div>
 
+        <!-- Banner Cuadros -->
         <div class="config-card">
-          <h4><i class="fas fa-image"></i> Banner 2</h4>
+          <h4><i class="fas fa-table"></i> Banner: Cuadros</h4>
           <div class="config-form">
             <div class="form-group">
-              <label>Título</label>
-              <input type="text" id="banner2-title" class="form-input" placeholder="¿Necesitás contactarnos?">
+              <label>Título del Banner</label>
+              <input type="text" id="banner2-title" class="form-input" placeholder="Título principal del banner">
             </div>
             <div class="form-group">
-              <label>Descripción</label>
-              <input type="text" id="banner2-desc" class="form-input" placeholder="Envianos tus consultas...">
+              <label>Texto del Botón</label>
+              <input type="text" id="banner2-desc" class="form-input" placeholder="Ver más">
             </div>
             <div class="form-group">
               <label>URL de destino</label>
-              <input type="url" id="banner2-url" class="form-input" placeholder="https://forms.google.com/...">
+              <input type="url" id="banner2-url" class="form-input" placeholder="https://...">
             </div>
             <div class="form-group">
               <label>URL de imagen de fondo</label>
@@ -300,21 +328,22 @@
               </small>
             </div>
             <button class="btn btn-primary" onclick="saveBanner(2)">
-              <i class="fas fa-save"></i> Guardar Banner 2
+              <i class="fas fa-save"></i> Guardar Banner
             </button>
           </div>
         </div>
 
+        <!-- Banner Encuestas -->
         <div class="config-card">
-          <h4><i class="fas fa-image"></i> Banner 3</h4>
+          <h4><i class="fas fa-file-alt"></i> Banner: Encuestas</h4>
           <div class="config-form">
             <div class="form-group">
-              <label>Título</label>
-              <input type="text" id="banner3-title" class="form-input" placeholder="Tercer banner publicitario">
+              <label>Título del Banner</label>
+              <input type="text" id="banner3-title" class="form-input" placeholder="Título principal del banner">
             </div>
             <div class="form-group">
-              <label>Descripción</label>
-              <input type="text" id="banner3-desc" class="form-input" placeholder="Descripción breve...">
+              <label>Texto del Botón</label>
+              <input type="text" id="banner3-desc" class="form-input" placeholder="Ver más">
             </div>
             <div class="form-group">
               <label>URL de destino</label>
@@ -328,16 +357,18 @@
               </small>
             </div>
             <button class="btn btn-primary" onclick="saveBanner(3)">
-              <i class="fas fa-save"></i> Guardar Banner 3
+              <i class="fas fa-save"></i> Guardar Banner
             </button>
           </div>
         </div>
-
-        <div class="config-info" style="background: rgba(0, 102, 204, 0.1); padding: 1rem; border-radius: var(--radius-md); margin-top: 1rem;">
-          <p style="margin: 0; color: var(--primary-blue); font-size: 0.9rem;">
-            <i class="fas fa-info-circle"></i> <strong>Distribución de banners:</strong> Los banners se mostrarán en posiciones aleatorias en la página de inicio para maximizar la visibilidad.
-          </p>
         </div>
+      </div>
+      <!-- Fin Sección Admin: Banners -->
+
+      <!-- Sección Admin: Cuadros -->
+      <div class="admin-content-section hidden" data-admin-section="cuadros">
+        <div class="config-section">
+          <h3><i class="fas fa-table"></i> Configuración de Enlaces - Cuadros</h3>
 
         <!-- Enlaces Config -->
         <div class="config-card">
@@ -372,24 +403,54 @@
             </button>
           </div>
         </div>
+        </div>
+      </div>
+      <!-- Fin Sección Admin: Cuadros -->
 
-        <div class="config-card">
-          <h4><i class="fas fa-file-alt"></i> Formularios</h4>
-          <div class="config-form">
-            <div class="form-group">
-              <label>Denuncias Anónimas</label>
-              <input type="url" id="link-denuncias" class="form-input" placeholder="URL Google Forms">
+      <!-- Sección Admin: Encuestas -->
+      <div class="admin-content-section hidden" data-admin-section="encuestas">
+        <div class="config-section">
+          <h3><i class="fas fa-file-alt"></i> Configuración de Enlaces - Encuestas</h3>
+
+          <div class="config-card">
+            <h4><i class="fas fa-file-alt"></i> Formularios</h4>
+            <div class="config-form">
+              <div class="form-group">
+                <label>Denuncias Anónimas</label>
+                <input type="url" id="link-denuncias" class="form-input" placeholder="URL Google Forms">
+              </div>
+              <div class="form-group">
+                <label>Encuesta de Satisfacción</label>
+                <input type="url" id="link-encuesta" class="form-input" placeholder="URL Google Forms">
+              </div>
+              <button class="btn btn-primary" onclick="saveFormLinks()">
+                <i class="fas fa-save"></i> Guardar Enlaces de Formularios
+              </button>
             </div>
-            <div class="form-group">
-              <label>Encuesta de Satisfacción</label>
-              <input type="url" id="link-encuesta" class="form-input" placeholder="URL Google Forms">
-            </div>
-            <button class="btn btn-primary" onclick="saveFormLinks()">
-              <i class="fas fa-save"></i> Guardar Enlaces de Formularios
-            </button>
           </div>
         </div>
       </div>
+      <!-- Fin Sección Admin: Encuestas -->
+
+      <!-- Admin Bottom Navigation -->
+      <nav class="admin-bottom-nav">
+        <button class="admin-nav-tab active" data-admin-tab="canchas">
+          <i class="fas fa-th"></i>
+          <span>Canchas</span>
+        </button>
+        <button class="admin-nav-tab" data-admin-tab="banners">
+          <i class="fas fa-image"></i>
+          <span>Banners</span>
+        </button>
+        <button class="admin-nav-tab" data-admin-tab="cuadros">
+          <i class="fas fa-table"></i>
+          <span>Cuadros</span>
+        </button>
+        <button class="admin-nav-tab" data-admin-tab="encuestas">
+          <i class="fas fa-file-alt"></i>
+          <span>Encuestas</span>
+        </button>
+      </nav>
     </section>
   </main>
 
