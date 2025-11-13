@@ -1917,9 +1917,6 @@ div.loading i {
     position: relative;
     pointer-events: none;
     overflow: hidden;
-    /* Reset any inherited loading styles */
-    text-align: inherit !important;
-    padding: inherit !important;
     /* Maintain button size during loading */
     min-width: fit-content;
     width: auto;
