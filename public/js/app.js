@@ -675,7 +675,6 @@ async function getAllUniqueTokens() {
 }
 
 // ---------- SISTEMA DE NOTIFICACIONES ----------
-const notificationsBtn = document.getElementById("notifications-btn");
 const notificationsBadge = document.getElementById("notifications-badge");
 const notificationsPanel = document.getElementById("notifications-panel");
 const notificationsList = document.getElementById("notifications-list");
